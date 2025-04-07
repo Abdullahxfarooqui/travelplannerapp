@@ -29,6 +29,12 @@
         <activity android:name=".ProfileActivity" />
         <activity
             android:name=".DetailActivity" />
+        <activity
+            android:name=".PropertyListingActivity" />
+        <activity
+            android:name=".PropertyBrowseActivity" />
+        <activity
+            android:name=".PropertyDetailActivity" />
     </application>
 
 </manifest>

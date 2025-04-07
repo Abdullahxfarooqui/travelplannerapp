@@ -6,17 +6,14 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.Toast
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.navigation.NavigationView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var tripAdapter: TripAdapter
     private lateinit var availableAdapter: AvailableAdapter
@@ -25,10 +22,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var availableRecyclerView: RecyclerView
     private lateinit var searchView: SearchView
     private lateinit var profileButton: ImageView
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
     private lateinit var notificationIcon: ImageView
     private lateinit var toolbar: androidx.appcompat.widget.Toolbar
+    private lateinit var bottomNavigationView: BottomNavigationView
 
     private val tripList = mutableListOf<Trip>()
     private val availableList = mutableListOf<Trip>()
@@ -39,33 +35,51 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main_bottom_nav)
 
         searchView = findViewById(R.id.searchView)
         tripRecyclerView = findViewById(R.id.recommendedrecyclerView)
         availableRecyclerView = findViewById(R.id.availableRecyclerView)
         profileButton = findViewById(R.id.profileImage)
-        drawerLayout = findViewById(R.id.drawerLayout)
-        navigationView = findViewById(R.id.navigationView)
         notificationIcon = findViewById(R.id.notificationIcon)
         toolbar = findViewById(R.id.toolbar)
+        bottomNavigationView = findViewById(R.id.bottomNavigation)
 
         // Setup Toolbar
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Setup Navigation Drawer
-        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        navigationView.setNavigationItemSelectedListener(this)
+        // Setup Bottom Navigation
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Already on home screen
+                    true
+                }
+                R.id.nav_browse -> {
+                    startActivity(Intent(this, PropertyBrowseActivity::class.java))
+                    true
+                }
+                R.id.nav_rent -> {
+                    startActivity(Intent(this, PropertyListingActivity::class.java))
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+        
+        // Add a button to browse rental properties
+        val exploreView = findViewById<ImageView>(R.id.explore)
+        exploreView.setOnClickListener {
+            startActivity(Intent(this, PropertyBrowseActivity::class.java))
+        }
 
         // Profile Button Click Listener
         profileButton.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
 
         // Notification Icon Click Listener
@@ -177,32 +191,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_home -> {
-                // Already on home screen
-                drawerLayout.closeDrawer(GravityCompat.START)
-            }
-            R.id.nav_profile -> {
-                startActivity(Intent(this, ProfileActivity::class.java))
-            }
-            R.id.nav_trips -> {
-                Toast.makeText(this, "My Trips", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_settings -> {
-                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show()
-            }
-        }
-        drawerLayout.closeDrawer(GravityCompat.START)
-        return true
-    }
 
+
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
+        super.onBackPressed()
     }
 
     fun updateTrip(tripId: String, newTitle: String, newLocation: String, newDescription: String) {

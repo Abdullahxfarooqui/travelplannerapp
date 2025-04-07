@@ -48,6 +48,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-    implementation ("com.squareup.picasso:picasso:2.8")
+    implementation("com.squareup.picasso:picasso:2.8")
+    
+    // Firebase Storage for image uploads
+    implementation("com.google.firebase:firebase-storage-ktx")
+    
+    // Activity Result API for image picking
+    implementation("androidx.activity:activity-ktx:1.8.2")
 
 }
