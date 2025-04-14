@@ -40,7 +40,7 @@ class PropertyAdapter(private val context: Context, private var properties: List
             Picasso.get()
                 .load(property.imageUrls[0])
                 .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.error_image)
+                .error(R.drawable.placeholder_image)
                 .fit()
                 .centerCrop()
                 .into(holder.imageView)

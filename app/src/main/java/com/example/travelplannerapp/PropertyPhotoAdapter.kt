@@ -27,11 +27,11 @@ class PropertyPhotoAdapter(
 
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val uri = photoUris[position]
-        
+
         Picasso.get()
             .load(uri)
             .placeholder(R.drawable.placeholder_image)
-            .error(R.drawable.error_image)
+            .error(R.drawable.placeholder_image)
             .fit()
             .centerCrop()
             .into(holder.imageView)
@@ -57,4 +57,9 @@ class PropertyPhotoAdapter(
     }
 
     fun getPhotoUris(): List<Uri> = photoUris.toList()
+
+    fun clearPhotos() {
+        photoUris.clear()
+        notifyDataSetChanged()
+    }
 }

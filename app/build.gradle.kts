@@ -34,6 +34,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -53,7 +56,12 @@ dependencies {
     // Firebase Storage for image uploads
     implementation("com.google.firebase:firebase-storage-ktx")
     
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth-ktx")
+    
     // Activity Result API for image picking
     implementation("androidx.activity:activity-ktx:1.8.2")
-
+    
+    // CircleImageView for circular profile images
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }

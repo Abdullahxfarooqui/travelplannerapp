@@ -112,7 +112,7 @@ class PropertyImageAdapter(private val imageUrls: List<String>) :
         com.squareup.picasso.Picasso.get()
             .load(imageUrl)
             .placeholder(R.drawable.placeholder_image)
-            .error(R.drawable.error_image)
+            .error(R.drawable.placeholder_image)
             .fit()
             .centerCrop()
             .into(holder.imageView)

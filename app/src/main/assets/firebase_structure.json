@@ -1,0 +1,41 @@
+{
+  "recommended_trips": {
+    "trip1": {
+      "name": "Neelum Valley",
+      "location": "Azad Kashmir, Pakistan",
+      "description": "Experience the breathtaking beauty of Neelum Valley, with its lush green meadows, pristine rivers, and snow-capped mountains. This tour offers a perfect blend of adventure and serenity.",
+      "imageUrl": "",
+      "imageResId": "neelumvalley"
+    },
+    "trip2": {
+      "name": "Hunza Valley",
+      "location": "Gilgit-Baltistan, Pakistan",
+      "description": "Discover the majestic Hunza Valley, known for its stunning landscapes, ancient forts, and rich cultural heritage.",
+      "imageUrl": "",
+      "imageResId": "hunza"
+    }
+  },
+  "available_trips": {
+    "trip1": {
+      "name": "Neelum Valley",
+      "location": "Azad Kashmir, Pakistan",
+      "description": "Experience the breathtaking beauty of Neelum Valley, with its lush green meadows, pristine rivers, and snow-capped mountains. This tour offers a perfect blend of adventure and serenity.",
+      "imageUrl": "",
+      "imageResId": "neelumvalley"
+    },
+    "trip2": {
+      "name": "Islamabad Tour",
+      "location": "Islamabad, Pakistan",
+      "description": "Explore the beautiful capital city of Pakistan, featuring modern architecture, lush parks, and cultural landmarks.",
+      "imageUrl": "",
+      "imageResId": "islamabad"
+    },
+    "trip3": {
+      "name": "Fairy Meadows",
+      "location": "Gilgit-Baltistan, Pakistan",
+      "description": "Visit the enchanting Fairy Meadows, offering spectacular views of Nanga Parbat and pristine alpine landscapes.",
+      "imageUrl": "",
+      "imageResId": "fairy_meadows"
+    }
+  }
+}

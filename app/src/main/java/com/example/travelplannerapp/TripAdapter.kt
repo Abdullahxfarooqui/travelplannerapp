@@ -22,21 +22,29 @@ class TripAdapter(private val context: Context, private var tripList: List<Trip>
         val trip = tripList[position]
         holder.bind(trip)
 
+        // Add debug logging to track binding
+        Log.d("TripAdapter", "Binding trip at position $position: ${trip.name}, imageUrl: ${trip.imageUrl}, imageResId: ${trip.imageResId}")
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, DetailActivity::class.java).apply {
                 putExtra("trip_name", trip.name)
                 putExtra("trip_location", trip.location)
                 putExtra("trip_description", trip.description)
-                putExtra("trip_image", trip.imageResId ?: 0)
+                putExtra("trip_image_url", trip.imageUrl)
+                putExtra("trip_image_res_id", trip.imageResId ?: 0)
             }
             context.startActivity(intent)
         }
     }
 
-    override fun getItemCount(): Int = tripList.size
+    override fun getItemCount(): Int {
+        // Add logging to track item count
+        Log.d("TripAdapter", "getItemCount called, returning ${tripList.size} items")
+        return tripList.size
+    }
 
     fun updateTrips(newTrips: List<Trip>) {
+        Log.d("TripAdapter", "updateTrips called with ${newTrips.size} trips")
         tripList = newTrips
         notifyDataSetChanged()
     }
@@ -52,14 +60,17 @@ class TripAdapter(private val context: Context, private var tripList: List<Trip>
             tripLocation.text = trip.location
             tripDescription.text = trip.description
 
-            Log.d("AdapterDebug", "Setting Description: ${trip.description}")
+            // Add logging before image loading
+            Log.d("TripViewHolder", "Binding trip: ${trip.name}, imageUrl: ${trip.imageUrl}, imageResId: ${trip.imageResId}")
 
-            // Load image correctly
-            if (trip.imageResId != null && trip.imageResId != 0) {
-                tripImage.setImageResource(trip.imageResId)
-            } else {
-                tripImage.setImageResource(R.drawable.placeholder_image) // Default image
-            }
+            // Use TripImageLoader to handle image loading
+            com.example.travelplannerapp.utils.TripImageLoader.loadTripImage(
+                itemView.context,
+                tripImage,
+                trip.imageUrl,
+                trip.imageResId,
+                trip.name
+            )
         }
     }
 }

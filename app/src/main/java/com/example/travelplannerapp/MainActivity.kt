@@ -1,218 +1,182 @@
 package com.example.travelplannerapp
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.SearchView
+import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.database.*
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var tripAdapter: TripAdapter
-    private lateinit var availableAdapter: AvailableAdapter
-
-    private lateinit var tripRecyclerView: RecyclerView
-    private lateinit var availableRecyclerView: RecyclerView
-    private lateinit var searchView: SearchView
-    private lateinit var profileButton: ImageView
-    private lateinit var notificationIcon: ImageView
     private lateinit var toolbar: androidx.appcompat.widget.Toolbar
     private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var profileImage: ShapeableImageView
 
-    private val tripList = mutableListOf<Trip>()
-    private val availableList = mutableListOf<Trip>()
-    private val notifications = mutableListOf<String>() // For storing notifications
+    private var currentFragment: Fragment? = null
 
-    private val originalTripList = mutableListOf<Trip>()
-    private val originalAvailableList = mutableListOf<Trip>()
+    private val homeFragment = HomeFragment()
+    private val browseFragment = BrowseFragment()
+    private val rentFragment = RentFragment()
+    private val profileFragment = ProfileFragment()
+
+    private val REQUEST_CODE_OPEN_DOCUMENT = 1001
+
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseStorage: FirebaseStorage = FirebaseStorage.getInstance()
+    private val firebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_bottom_nav)
 
-        searchView = findViewById(R.id.searchView)
-        tripRecyclerView = findViewById(R.id.recommendedrecyclerView)
-        availableRecyclerView = findViewById(R.id.availableRecyclerView)
-        profileButton = findViewById(R.id.profileImage)
-        notificationIcon = findViewById(R.id.notificationIcon)
         toolbar = findViewById(R.id.toolbar)
         bottomNavigationView = findViewById(R.id.bottomNavigation)
+        profileImage = findViewById(R.id.profileImage)
 
-        // Setup Toolbar
+        // Set up Toolbar
         setSupportActionBar(toolbar)
 
-        // Setup Bottom Navigation
+        // Profile Image click to pick an image
+        profileImage.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
+            }
+            startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT)
+        }
+
+        // Set up Bottom Navigation
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    // Already on home screen
+                    loadFragment(homeFragment)
                     true
                 }
                 R.id.nav_browse -> {
-                    startActivity(Intent(this, PropertyBrowseActivity::class.java))
+                    loadFragment(browseFragment)
                     true
                 }
                 R.id.nav_rent -> {
-                    startActivity(Intent(this, PropertyListingActivity::class.java))
+                    loadFragment(rentFragment)
                     true
                 }
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    loadFragment(profileFragment)
                     true
                 }
                 else -> false
             }
         }
-        
-        // Add a button to browse rental properties
-        val exploreView = findViewById<ImageView>(R.id.explore)
-        exploreView.setOnClickListener {
-            startActivity(Intent(this, PropertyBrowseActivity::class.java))
-        }
 
-        // Profile Button Click Listener
-        profileButton.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
+        handleIntent(intent)
 
-        // Notification Icon Click Listener
-        notificationIcon.setOnClickListener {
-            showNotifications()
-        }
-
-        tripAdapter = TripAdapter(this, tripList)
-        availableAdapter = AvailableAdapter(this, availableList)
-
-        tripRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        availableRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-
-        tripRecyclerView.adapter = tripAdapter
-        availableRecyclerView.adapter = availableAdapter
-
-        fetchTrips()
-        fetchAvailableTrips()
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                filterTrips(query)
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                filterTrips(newText)
-                return true
-            }
-        })
-    }
-
-    private fun fetchTrips() {
-        val database = FirebaseDatabase.getInstance().getReference("trips")
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                tripList.clear()
-                originalTripList.clear()
-
-                for (tripSnapshot in snapshot.children) {
-                    val trip = tripSnapshot.getValue(Trip::class.java)
-                    trip?.let {
-                        tripList.add(it)
-                        originalTripList.add(it)
-                    }
-                }
-                tripAdapter.notifyDataSetChanged()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Failed to load trips", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun fetchAvailableTrips() {
-        val database = FirebaseDatabase.getInstance().getReference("available_trips")
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                availableList.clear()
-                originalAvailableList.clear()
-
-                for (tripSnapshot in snapshot.children) {
-                    val trip = tripSnapshot.getValue(Trip::class.java)
-                    trip?.let {
-                        availableList.add(it)
-                        originalAvailableList.add(it)
-                    }
-                }
-                availableAdapter.notifyDataSetChanged()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Failed to load available trips", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun filterTrips(query: String?) {
-        val filteredTrips = if (query.isNullOrBlank()) originalTripList else originalTripList.filter {
-            it.name.contains(query, ignoreCase = true) || it.location.contains(query, ignoreCase = true)
-        }
-        tripAdapter.updateTrips(filteredTrips)
-
-        val filteredAvailable = if (query.isNullOrBlank()) originalAvailableList else originalAvailableList.filter {
-            it.name.contains(query, ignoreCase = true) || it.location.contains(query, ignoreCase = true)
-        }
-        availableAdapter.updateTrips(filteredAvailable)
-    }
-
-    private fun showNotifications() {
-        if (notifications.isEmpty()) {
-            AlertDialog.Builder(this)
-                .setTitle("Notifications")
-                .setMessage("No notifications")
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .show()
-        } else {
-            val notificationList = notifications.joinToString("\n")
-            AlertDialog.Builder(this)
-                .setTitle("Notifications")
-                .setMessage(notificationList)
-                .setPositiveButton("Clear All") { dialog, _ ->
-                    notifications.clear()
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Close") { dialog, _ -> dialog.dismiss() }
-                .show()
+        if (savedInstanceState == null) {
+            loadFragment(homeFragment)
+            bottomNavigationView.selectedItemId = R.id.nav_home
         }
     }
 
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
     }
 
-    fun updateTrip(tripId: String, newTitle: String, newLocation: String, newDescription: String) {
-        val database = FirebaseDatabase.getInstance().reference.child("trips").child(tripId)
+    private fun handleIntent(intent: Intent) {
+        when (intent.getStringExtra("navigation_destination")) {
+            "browse" -> navigateToTab(R.id.nav_browse)
+            "rent" -> navigateToTab(R.id.nav_rent)
+            "profile" -> navigateToTab(R.id.nav_profile)
+        }
+    }
 
-        val updatedTrip = mapOf(
-            "name" to newTitle,
-            "location" to newLocation,
-            "description" to newDescription
+    private fun loadFragment(fragment: Fragment) {
+        if (currentFragment != null && currentFragment!!::class.java == fragment::class.java) {
+            return
+        }
+
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.setCustomAnimations(
+            android.R.anim.fade_in,
+            android.R.anim.fade_out
         )
+        fragmentTransaction.replace(R.id.fragment_container, fragment)
+        fragmentTransaction.commit()
 
-        database.updateChildren(updatedTrip).addOnSuccessListener {
-            Toast.makeText(this, "Trip updated successfully!", Toast.LENGTH_SHORT).show()
-            fetchTrips()
-            fetchAvailableTrips()
-        }.addOnFailureListener {
-            Toast.makeText(this, "Failed to update trip!", Toast.LENGTH_SHORT).show()
+        currentFragment = fragment
+    }
+
+    fun navigateToTab(tabId: Int) {
+        bottomNavigationView.selectedItemId = tabId
+    }
+
+    override fun onBackPressed() {
+        if (currentFragment !is HomeFragment) {
+            navigateToTab(R.id.nav_home)
+        } else {
+            super.onBackPressed()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val user = firebaseAuth.currentUser
+        if (user != null) {
+            val userId = user.uid
+            val userProfileImageRef = firebaseDatabase.reference.child("users").child(userId).child("profile_image_url")
+            userProfileImageRef.get().addOnSuccessListener { snapshot ->
+                val imageUrl = snapshot.value as? String
+                imageUrl?.let {
+                    loadImageFromUrl(it)
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_OPEN_DOCUMENT && resultCode == Activity.RESULT_OK) {
+            data?.data?.let { uri ->
+                try {
+                    // Upload image to Firebase Storage
+                    val storageReference = firebaseStorage.reference.child("profile_images")
+                        .child(UUID.randomUUID().toString())
+
+                    storageReference.putFile(uri).addOnSuccessListener {
+                        // Get the download URL
+                        storageReference.downloadUrl.addOnSuccessListener { downloadUri ->
+                            val downloadUrl = downloadUri.toString()
+                            // Save the image URL in Firebase Realtime Database
+                            val user = firebaseAuth.currentUser
+                            if (user != null) {
+                                val userId = user.uid
+                                val userProfileImageRef = firebaseDatabase.reference.child("users").child(userId).child("profile_image_url")
+                                userProfileImageRef.setValue(downloadUrl).addOnSuccessListener {
+                                    Log.d("MainActivity", "Profile image URL saved to Firebase: $downloadUrl")
+                                    loadImageFromUrl(downloadUrl)
+                                }
+                            }
+                        }
+                    }
+                } catch (e: SecurityException) {
+                    Log.e("MainActivity", "Permission error: ${e.message}")
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun loadImageFromUrl(url: String) {
+        Picasso.get().load(url).into(profileImage)
     }
 }

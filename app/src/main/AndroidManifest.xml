@@ -3,8 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.travelplannerapp">
 
-    <!-- Permission to access the internet (required for Picasso to load images from the web) -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -17,7 +19,7 @@
         android:theme="@style/Theme.Travelplannerapp"
         tools:targetApi="31">
 
-        <!-- MainActivity declaration -->
+        <!-- Activities -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -27,14 +29,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".ProfileActivity" />
-        <activity
-            android:name=".DetailActivity" />
-        <activity
-            android:name=".PropertyListingActivity" />
-        <activity
-            android:name=".PropertyBrowseActivity" />
-        <activity
-            android:name=".PropertyDetailActivity" />
+        <activity android:name=".DetailActivity" />
+        <activity android:name=".PropertyListingActivity" />
+        <activity android:name=".PropertyBrowseActivity" />
+        <activity android:name=".PropertyDetailActivity" />
+
     </application>
 
 </manifest>

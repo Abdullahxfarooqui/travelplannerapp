@@ -4,14 +4,18 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class Trip(
-    val name: String = "",
-    val location: String = "",
-    val description: String = "",
-    val imageUrl: String? = null,  // URL for online images
+    var id: String = "",  // Firebase unique identifier
+    var name: String = "",
+    var location: String = "",
+    var description: String = "",
+    var imageUrl: String? = null,  // URL for online images
     val imageResId: Int? = null    // Nullable image resource ID for local images
 ) : Parcelable {
+    // Empty constructor for Firebase
+    constructor() : this("", "", "", "", null, null)
 
     constructor(parcel: Parcel) : this(
+        parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readString() ?: "",
@@ -20,6 +24,7 @@ data class Trip(
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
         parcel.writeString(name)
         parcel.writeString(location)
         parcel.writeString(description)
