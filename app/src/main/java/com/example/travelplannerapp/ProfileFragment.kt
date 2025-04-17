@@ -72,108 +72,206 @@ class ProfileFragment : Fragment() {
         nameTextView = view.findViewById(R.id.userNameText)
         emailTextView = view.findViewById(R.id.emailText)
         editProfileButton = view.findViewById(R.id.editProfileButton)
-
-        // Load user profile data
-        loadProfileData()
-
-        // Set edit button click listener
-        editProfileButton.setOnClickListener {
-            startActivity(Intent(requireContext(), ProfileActivity::class.java))
-        }
-
-        // Set profile image click listener
+        
+        // Set up profile image click listener
         profileImage.setOnClickListener {
-            try {
-                pickImage.launch(arrayOf("image/*"))
-            } catch (e: Exception) {
-                Toast.makeText(context, "Failed to open image picker: ${e.message}", Toast.LENGTH_SHORT).show()
+            pickImage.launch(arrayOf("image/*"))
+        }
+        
+        // Set up edit profile button
+        editProfileButton.setOnClickListener {
+            val currentUser = auth.currentUser
+            if (currentUser != null) {
+                val intent = Intent(requireContext(), ProfileActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Redirect to login if not authenticated
+                Toast.makeText(context, "Please log in to edit your profile", Toast.LENGTH_SHORT).show()
+                val intent = Intent(requireContext(), LoginActivity::class.java)
+                startActivity(intent)
             }
         }
-
-        // Load and display saved profile image URI (safely)
-        val sharedPrefs = requireContext().getSharedPreferences("profile_prefs", 0)
-        val savedImageUriString = sharedPrefs.getString("profile_image_uri", null)
-
-        savedImageUriString?.let { savedUri ->
-            try {
-                val uri = Uri.parse(savedUri)
-                // First check if we have persisted permissions
-                val hasPermission = requireContext().contentResolver.persistedUriPermissions.any { 
-                    it.uri == uri && it.isReadPermission
-                }
-                
-                if (hasPermission) {
-                    try {
-                        // Verify we can actually access the content
-                        requireContext().contentResolver.openInputStream(uri)?.use { stream ->
-                            // If we can open the stream, we have proper access
-                            profileImage.setImageURI(null) // Clear any existing image
-                            profileImage.setImageURI(uri)  // Set new image
-                        } ?: throw SecurityException("Cannot access image content")
-                    } catch (e: SecurityException) {
-                        throw e // Propagate security exceptions
-                    } catch (e: Exception) {
-                        // Handle other IO errors
-                        throw SecurityException("Failed to load image: ${e.message}")
-                    }
-                } else {
-                    throw SecurityException("No permission to access image")
-                }
-            } catch (e: SecurityException) {
-                // Clear invalid URI and set default image
-                sharedPrefs.edit().remove("profile_image_uri").apply()
-                profileImage.setImageResource(R.drawable.ic_profile_placeholder)
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-                Log.e("ProfileFragment", "Security exception: ${e.message}")
-            } catch (e: Exception) {
-                // Handle parsing errors or other exceptions
-                sharedPrefs.edit().remove("profile_image_uri").apply()
-                profileImage.setImageResource(R.drawable.ic_profile_placeholder)
-                Toast.makeText(context, "Error loading saved image", Toast.LENGTH_SHORT).show()
-                Log.e("ProfileFragment", "Failed to load image URI: ${e.message}")
-            }
-        }
+        
+        // Load profile data
+        loadProfileData()
     }
 
     private fun loadProfileData() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
+            // Show loading state
+            nameTextView.text = "Loading..."
+            emailTextView.text = "Please wait"
+            
             val userRef = databaseReference.child("users").child(currentUser.uid)
             userRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val name = snapshot.child("fullName").getValue(String::class.java)
-                    val email = snapshot.child("email").getValue(String::class.java)
-                    val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+                    try {
+                        val name = snapshot.child("fullName").getValue(String::class.java)
+                        val email = snapshot.child("email").getValue(String::class.java)
+                        val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+                        val phone = snapshot.child("phone").getValue(String::class.java)
+                        val location = snapshot.child("location").getValue(String::class.java)
 
-                    // Load profile image from Firebase if available
-                    if (!profileImageUrl.isNullOrEmpty()) {
-                        Picasso.get()
-                            .load(profileImageUrl)
-                            .placeholder(R.drawable.ic_profile_placeholder)
-                            .error(R.drawable.ic_profile_placeholder)
-                            .into(profileImage)
-                    } else {
-                        profileImage.setImageResource(R.drawable.ic_profile_placeholder)
-                    }
+                        // Load profile image from Firebase if available
+                        if (!profileImageUrl.isNullOrEmpty()) {
+                            try {
+                                Picasso.get()
+                                    .load(profileImageUrl)
+                                    .placeholder(R.drawable.ic_profile_placeholder)
+                                    .error(R.drawable.ic_profile_placeholder)
+                                    .into(profileImage, object : com.squareup.picasso.Callback {
+                                        override fun onSuccess() {
+                                            Log.d("ProfileFragment", "Profile image loaded successfully")
+                                        }
+                                        
+                                        override fun onError(e: Exception?) {
+                                            Log.e("ProfileFragment", "Error loading profile image", e)
+                                            // Try to load from SharedPreferences as fallback
+                                            loadLocalProfileImage()
+                                        }
+                                    })
+                            } catch (e: Exception) {
+                                Log.e("ProfileFragment", "Error with Picasso", e)
+                                // Try to load from SharedPreferences as fallback
+                                loadLocalProfileImage()
+                            }
+                        } else {
+                            // No Firebase image, try local
+                            loadLocalProfileImage()
+                        }
 
-                    if (name.isNullOrEmpty() && email.isNullOrEmpty()) {
-                        // If no data exists yet, use the basic user info
+                        // Update UI with profile data
+                        if (name.isNullOrEmpty() && email.isNullOrEmpty()) {
+                            // If no data exists yet, use the basic user info
+                            nameTextView.text = currentUser.displayName ?: "Name not set"
+                            emailTextView.text = currentUser.email ?: "Email not available"
+                        } else {
+                            nameTextView.text = name ?: currentUser.displayName ?: "Name not set"
+                            emailTextView.text = email ?: currentUser.email ?: "Email not available"
+                        }
+                        
+                        // Save to SharedPreferences for offline access
+                        context?.let { ctx ->
+                            ctx.getSharedPreferences("user_profile_data", 0)
+                                .edit()
+                                .putString("fullName", name)
+                                .putString("email", email)
+                                .putString("phone", phone)
+                                .putString("location", location)
+                                .apply()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ProfileFragment", "Error processing profile data", e)
+                        Toast.makeText(context, "Error processing profile data: ${e.message}", Toast.LENGTH_LONG).show()
+                        
+                        // Fall back to basic info
                         nameTextView.text = currentUser.displayName ?: "Name not set"
                         emailTextView.text = currentUser.email ?: "Email not available"
-                    } else {
-                        nameTextView.text = name ?: currentUser.displayName ?: "Name not set"
-                        emailTextView.text = email ?: currentUser.email ?: "Email not available"
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ProfileFragment", "Error loading profile data: ${error.message}")
-                    Toast.makeText(context, "Failed to load profile data", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Failed to load profile data: ${error.message}", Toast.LENGTH_LONG).show()
+                    
+                    // Fall back to basic info
+                    nameTextView.text = currentUser.displayName ?: "Name not set"
+                    emailTextView.text = currentUser.email ?: "Email not available"
+                    
+                    // Try to load cached data from SharedPreferences
+                    loadCachedProfileData(currentUser)
                 }
             })
         } else {
             nameTextView.text = "Guest"
             emailTextView.text = "Not logged in"
+            profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+            
+            // Disable edit button for guests
+            editProfileButton.isEnabled = false
+            editProfileButton.text = "Login to Edit Profile"
+        }
+    }
+    
+    private fun loadLocalProfileImage() {
+        try {
+            // Try to load image from SharedPreferences
+            val sharedPrefs = context?.getSharedPreferences("profile_prefs", 0)
+            val imageUriString = sharedPrefs?.getString("profile_image_uri", null)
+            
+            if (!imageUriString.isNullOrEmpty()) {
+                try {
+                    val imageUri = Uri.parse(imageUriString)
+                    
+                    // Check if we have permission to access this URI
+                    val hasPermission = context?.contentResolver?.persistedUriPermissions?.any { 
+                        it.uri == imageUri && it.isReadPermission 
+                    } ?: false
+                    
+                    if (hasPermission) {
+                        // We have permission, try to load the image
+                        context?.contentResolver?.openInputStream(imageUri)?.use { _ ->
+                            // If we can open the stream, we have proper access
+                            profileImage.setImageURI(null) // Clear any existing image
+                            profileImage.setImageURI(imageUri) // Set new image
+                            Log.d("ProfileFragment", "Loaded profile image from local storage")
+                        } ?: throw SecurityException("Cannot access image content")
+                    } else {
+                        throw SecurityException("No permission to access image")
+                    }
+                } catch (e: SecurityException) {
+                    Log.e("ProfileFragment", "Security exception when accessing local image", e)
+                    // Clear invalid URI and set default image
+                    sharedPrefs.edit().remove("profile_image_uri").apply()
+                    profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+                } catch (e: Exception) {
+                    Log.e("ProfileFragment", "Error loading local profile image", e)
+                    // Clear invalid URI and set default image
+                    sharedPrefs.edit().remove("profile_image_uri").apply()
+                    profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+                }
+            } else {
+                // No local image found, use placeholder
+                profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+            }
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "Error in loadLocalProfileImage", e)
+            profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+        }
+    }
+    
+    private fun loadCachedProfileData(currentUser: com.google.firebase.auth.FirebaseUser) {
+        try {
+            // Try to load profile data from SharedPreferences
+            val sharedPrefs = context?.getSharedPreferences("user_profile_data", 0)
+            if (sharedPrefs != null) {
+                val name = sharedPrefs.getString("fullName", null)
+                val email = sharedPrefs.getString("email", null)
+                
+                // Update UI with cached data if available
+                if (!name.isNullOrEmpty()) {
+                    nameTextView.text = name
+                } else {
+                    nameTextView.text = currentUser.displayName ?: "Name not set"
+                }
+                
+                if (!email.isNullOrEmpty()) {
+                    emailTextView.text = email
+                } else {
+                    emailTextView.text = currentUser.email ?: "Email not available"
+                }
+                
+                Log.d("ProfileFragment", "Loaded profile data from cache")
+            }
+            
+            // Try to load local profile image
+            loadLocalProfileImage()
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "Error loading cached profile data", e)
+            // Fall back to basic info from FirebaseUser
+            nameTextView.text = currentUser.displayName ?: "Name not set"
+            emailTextView.text = currentUser.email ?: "Email not available"
         }
     }
 }

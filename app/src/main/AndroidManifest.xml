@@ -21,18 +21,34 @@
 
         <!-- Activities -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Travelplannerapp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity 
+            android:name=".MainActivity"
+            android:exported="false" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".DetailActivity" />
         <activity android:name=".PropertyListingActivity" />
         <activity android:name=".PropertyBrowseActivity" />
         <activity android:name=".PropertyDetailActivity" />
+        <activity 
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity 
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity 
+            android:name=".OtpVerificationActivity"
+            android:exported="false" />
+        <activity 
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
 
     </application>
 

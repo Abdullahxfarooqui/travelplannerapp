@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.travelplannerapp.utils.ImageDatabaseLoader
 import com.squareup.picasso.Picasso
 
 class PropertyPhotoAdapter(
@@ -28,13 +29,20 @@ class PropertyPhotoAdapter(
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val uri = photoUris[position]
 
-        Picasso.get()
-            .load(uri)
-            .placeholder(R.drawable.placeholder_image)
-            .error(R.drawable.placeholder_image)
-            .fit()
-            .centerCrop()
-            .into(holder.imageView)
+        // Check if this is a string URL (for database images) or a Uri
+        if (uri.toString().startsWith("db://")) {
+            // This is a database reference, use our custom loader
+            ImageDatabaseLoader.loadImage(holder.imageView, uri.toString())
+        } else {
+            // This is a regular Uri, use Picasso
+            Picasso.get()
+                .load(uri)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .fit()
+                .centerCrop()
+                .into(holder.imageView)
+        }
 
         holder.removeButton.setOnClickListener {
             onPhotoRemoved(position)

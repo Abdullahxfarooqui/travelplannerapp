@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-parcelize") // Add this line for Parcelize
     id("com.google.gms.google-services")
 }
 
@@ -40,6 +41,8 @@ android {
 }
 
 dependencies {
+    // SafetyNet for reCAPTCHA
+    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -51,6 +54,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation (("com.google.firebase:firebase-storage:20.3.0")) // or latest
     implementation("com.squareup.picasso:picasso:2.8")
     
     // Firebase Storage for image uploads
@@ -59,9 +63,16 @@ dependencies {
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth-ktx")
     
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    
     // Activity Result API for image picking
     implementation("androidx.activity:activity-ktx:1.8.2")
     
     // CircleImageView for circular profile images
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    
+    // OkHttp for network requests
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 }

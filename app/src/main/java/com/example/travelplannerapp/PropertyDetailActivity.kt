@@ -109,13 +109,21 @@ class PropertyImageAdapter(private val imageUrls: List<String>) :
     
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val imageUrl = imageUrls[position]
-        com.squareup.picasso.Picasso.get()
-            .load(imageUrl)
-            .placeholder(R.drawable.placeholder_image)
-            .error(R.drawable.placeholder_image)
-            .fit()
-            .centerCrop()
-            .into(holder.imageView)
+        
+        // Check if this is a database reference URL
+        if (imageUrl.startsWith("db://")) {
+            // Use our custom database image loader
+            com.example.travelplannerapp.utils.ImageDatabaseLoader.loadImage(holder.imageView, imageUrl)
+        } else {
+            // Regular URL, use Picasso
+            com.squareup.picasso.Picasso.get()
+                .load(imageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .fit()
+                .centerCrop()
+                .into(holder.imageView)
+        }
     }
     
     override fun getItemCount(): Int = imageUrls.size

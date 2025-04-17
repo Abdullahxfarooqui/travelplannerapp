@@ -13,7 +13,8 @@ data class PropertyListing(
     val imageUrls: List<String> = listOf(),
     val ownerId: String = "",
     val isAvailable: Boolean = true,
-    val amenities: List<String> = listOf()
+    val amenities: List<String> = listOf(),
+    var isOwnProperty: Boolean = false
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -26,7 +27,8 @@ data class PropertyListing(
         parcel.createStringArrayList() ?: listOf(),
         parcel.readString() ?: "",
         parcel.readByte() != 0.toByte(),
-        parcel.createStringArrayList() ?: listOf()
+        parcel.createStringArrayList() ?: listOf(),
+        parcel.readByte() != 0.toByte()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -40,6 +42,7 @@ data class PropertyListing(
         parcel.writeString(ownerId)
         parcel.writeByte(if (isAvailable) 1 else 0)
         parcel.writeStringList(amenities)
+        parcel.writeByte(if (isOwnProperty) 1 else 0)
     }
 
     override fun describeContents(): Int = 0

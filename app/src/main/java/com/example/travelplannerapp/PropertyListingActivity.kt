@@ -1,9 +1,12 @@
 package com.example.travelplannerapp
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,8 +15,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class PropertyListingActivity : AppCompatActivity() {
@@ -28,7 +32,6 @@ class PropertyListingActivity : AppCompatActivity() {
     private lateinit var photosRecyclerView: RecyclerView
     private lateinit var photoAdapter: PropertyPhotoAdapter
 
-    private val storage = FirebaseStorage.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
 
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -121,60 +124,125 @@ class PropertyListingActivity : AppCompatActivity() {
     }
 
     private fun uploadListing() {
-        // Show loading indicator
         submitButton.isEnabled = false
         submitButton.text = "Uploading..."
-
         val title = titleEditText.text.toString().trim()
         val description = descriptionEditText.text.toString().trim()
         val location = locationEditText.text.toString().trim()
         val price = priceEditText.text.toString().toDouble()
         val maxGuests = guestsEditText.text.toString().toInt()
         val photoUris = photoAdapter.getPhotoUris()
-
-        // Generate a unique ID for the property
         val propertyId = database.child("properties").push().key ?: UUID.randomUUID().toString()
         val imageUrls = mutableListOf<String>()
-
-        // Upload each image to Firebase Storage
-        var uploadedCount = 0
-        for ((index, uri) in photoUris.withIndex()) {
-            val imageRef = storage.reference.child("property_images/${propertyId}/${index}.jpg")
-            val uploadTask = imageRef.putFile(uri)
-
-            uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let { throw it }
-                }
-                imageRef.downloadUrl
-            }.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val downloadUrl = task.result.toString()
-                    imageUrls.add(downloadUrl)
-                    uploadedCount++
-
-                    // When all images are uploaded, save the property listing
-                    if (uploadedCount == photoUris.size) {
-                        savePropertyToDatabase(propertyId, title, description, location, price, maxGuests, imageUrls)
-                    }
-                } else {
-                    // Handle failure
-                    submitButton.isEnabled = true
-                    submitButton.text = "Submit Listing"
-                    Toast.makeText(this, "Failed to upload images", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        // If no photos to upload, save property directly
         if (photoUris.isEmpty()) {
             savePropertyToDatabase(propertyId, title, description, location, price, maxGuests, imageUrls)
+            return
+        }
+        uploadImagesSequentially(photoUris, propertyId, 0, imageUrls) { success ->
+            if (success) {
+                savePropertyToDatabase(propertyId, title, description, location, price, maxGuests, imageUrls)
+            } else {
+                submitButton.isEnabled = true
+                submitButton.text = "Submit Listing"
+                Toast.makeText(this, "Failed to upload all images. Please try again.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun uploadImagesSequentially(photoUris: List<Uri>, propertyId: String, index: Int, imageUrls: MutableList<String>, onComplete: (Boolean) -> Unit) {
+        if (index >= photoUris.size) {
+            onComplete(true)
+            return
+        }
+        val uri = photoUris[index]
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid
+        if (userId.isNullOrEmpty() || uri.scheme == null || uri.path == null) {
+            Toast.makeText(this, "Invalid image or user ID at position ${index + 1}", Toast.LENGTH_SHORT).show()
+            onComplete(false)
+            return
+        }
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            if (inputStream == null) {
+                Toast.makeText(this, "Cannot access image ${index + 1}. Please reselect the photo.", Toast.LENGTH_SHORT).show()
+                onComplete(false)
+                return
+            }
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            val baos = ByteArrayOutputStream()
+            
+            // Compress the image to reduce size (adjust quality as needed)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+            val data = baos.toByteArray()
+            inputStream.close()
+            
+            // Check if image is too large even after compression
+            if (data.size > 1 * 1024 * 1024) { // 1MB limit for base64 encoded images
+                // Try to compress further if still too large
+                baos.reset()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos)
+                val compressedData = baos.toByteArray()
+                
+                if (compressedData.size > 1 * 1024 * 1024) {
+                    Toast.makeText(this, "Image ${index + 1} is too large. Please select a smaller image.", Toast.LENGTH_SHORT).show()
+                    onComplete(false)
+                    return
+                }
+            }
+            
+            // Convert image to Base64 string
+            val base64Image = Base64.encodeToString(data, Base64.DEFAULT)
+            val timestamp = System.currentTimeMillis()
+            val imageId = "${userId}_${timestamp}_${index}"
+            
+            // Update progress on UI thread
+            runOnUiThread {
+                val progress = ((index + 1) * 100) / photoUris.size
+                submitButton.text = "Uploading ${progress}%"
+            }
+            
+            // Store image data directly in Firebase Realtime Database
+            val imageRef = database.child("property_images").child(propertyId).child(imageId)
+            
+            // Create a map with image data
+            val imageData = HashMap<String, Any>()
+            imageData["data"] = base64Image
+            imageData["timestamp"] = timestamp
+            imageData["userId"] = userId
+            
+            // Save image to Firebase Realtime Database
+            imageRef.setValue(imageData)
+                .addOnSuccessListener {
+                    // Create a reference URL to the image in the database
+                    val imageUrl = "db://property_images/$propertyId/$imageId"
+                    imageUrls.add(imageUrl)
+                    
+                    // Continue with next image
+                    uploadImagesSequentially(photoUris, propertyId, index + 1, imageUrls, onComplete)
+                }
+                .addOnFailureListener { e ->
+                    runOnUiThread {
+                        Toast.makeText(this, "Failed to upload image ${index + 1}: ${e.message}", Toast.LENGTH_SHORT).show()
+                        onComplete(false)
+                    }
+                }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error processing image ${index + 1}: ${e.message}", Toast.LENGTH_SHORT).show()
+            onComplete(false)
         }
     }
 
     private fun savePropertyToDatabase(propertyId: String, title: String, description: String, 
                                       location: String, price: Double, maxGuests: Int, imageUrls: List<String>) {
-        // Create property object
+        // Get current user ID
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val ownerId = currentUser?.uid ?: return // Don't allow anonymous listings
+        
+        // Log the image URLs for debugging
+        Log.d("PropertyListing", "Saving property with ${imageUrls.size} images: $imageUrls")
+        
+        // Create property object with proper visibility flags
         val property = PropertyListing(
             id = propertyId,
             title = title,
@@ -183,7 +251,10 @@ class PropertyListingActivity : AppCompatActivity() {
             pricePerNight = price,
             maxGuests = maxGuests,
             imageUrls = imageUrls,
-            ownerId = "user_id" // In a real app, this would be the current user's ID
+            ownerId = ownerId,
+            isAvailable = true,
+            isOwnProperty = true,
+            amenities = listOf() // Default empty amenities list
         )
 
         // Save to Firebase
