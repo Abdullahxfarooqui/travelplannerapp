@@ -479,7 +479,8 @@ class LoginActivity : AppCompatActivity() {
                         profileImageUrl = user.photoUrl?.toString() ?: "",
                         createdAt = System.currentTimeMillis(),
                         lastLogin = System.currentTimeMillis(),
-                        isEmailVerified = user.isEmailVerified
+                        isEmailVerified = user.isEmailVerified,
+                        role = "" // Role will be selected in RoleSelectionActivity
                     )
 
                     database.child("users").child(userId).setValue(userData)
@@ -504,7 +505,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun startMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        // Redirect to role selection instead of MainActivity
+        val intent = Intent(this, RoleSelectionActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

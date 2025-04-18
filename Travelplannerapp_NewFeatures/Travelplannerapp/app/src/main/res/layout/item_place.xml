@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical">
+
+    <!-- ImageView for place image -->
+    <ImageView
+        android:id="@+id/testImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:background="#ccc" /> <!-- temporary background to see image bounds -->
+
+    <!-- Text container for place name and description -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingStart="10dp"> <!-- Added padding for better spacing -->
+
+        <!-- Place Name TextView -->
+        <TextView
+            android:id="@+id/place_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="Place Name"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <!-- Place Description TextView -->
+        <TextView
+            android:id="@+id/place_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="Place Description"
+            android:textSize="14sp" />
+
+        <!-- View Button at the bottom -->
+        <Button
+            android:id="@+id/view_button"
+            android:layout_width="85dp"
+            android:layout_height="40dp"
+            android:text="View"
+            android:backgroundTint="@color/Aqua"
+            android:visibility="gone"
+            android:layout_marginTop="10dp" /> <!-- Spacing between the description and button -->
+    </LinearLayout>
+</LinearLayout>

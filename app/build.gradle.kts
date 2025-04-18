@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,7 +72,9 @@ dependencies {
     
     // CircleImageView for circular profile images
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    
+
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // OkHttp for network requests
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 

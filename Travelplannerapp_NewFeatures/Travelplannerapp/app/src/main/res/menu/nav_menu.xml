@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_profile"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile" />
+
+
+    <item
+        android:id="@+id/spacer_1"
+        android:title=""
+        android:enabled="false"
+        android:icon="@android:color/transparent" />
+
+    <item
+        android:id="@+id/nav_trips_planned"
+        android:title="Trips Planned"
+        android:icon="@drawable/ic_trips" />
+
+
+    <item
+        android:id="@+id/spacer_2"
+        android:title=""
+        android:enabled="false"
+        android:icon="@android:color/transparent" />
+
+    <item
+        android:id="@+id/nav_plan_trip"
+        android:title="Plan a Trip"
+        android:icon="@drawable/ic_plan" />
+
+
+    <item
+        android:id="@+id/spacer_3"
+        android:title=""
+        android:enabled="false"
+        android:icon="@android:color/transparent" />
+
+    <group android:id="@+id/nav_recommended_places_group" android:visible="false">
+        <item
+            android:id="@+id/nav_recommended_places"
+            android:title="Recommended Places"
+            android:icon="@drawable/ic_recommend" />
+    </group>
+
+
+    <item
+        android:id="@+id/divider"
+        android:title="────────────"
+        android:enabled="false"/>
+
+
+    <item
+        android:id="@+id/spacer_4"
+        android:title=""
+        android:enabled="false"
+        android:icon="@android:color/transparent" />
+
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Logout"
+        android:icon="@drawable/ic_logout" />
+
+</menu>

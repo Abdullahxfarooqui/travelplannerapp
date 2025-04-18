@@ -11,5 +11,6 @@ data class User(
     val profileImageUrl: String = "",
     val createdAt: Long = 0L,
     val lastLogin: Long = 0L,
-    val isEmailVerified: Boolean = false
+    val isEmailVerified: Boolean = false,
+    val role: String = "" // Can be "User" or "Organizer"
 ) : Parcelable

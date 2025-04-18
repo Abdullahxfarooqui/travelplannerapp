@@ -1,0 +1,92 @@
+{
+  "Hunza": {
+    "description": "Home to some of the world's best treks, including the Karakoram range and the Hunza Valley.",
+    "name": "Hunza Valley",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Hunza_Valley_-_Pakistan.jpg/800px-Hunza_Valley_-_Pakistan.jpg"
+  },
+  "Naran-Kaghan": {
+    "description": "A tourist destination, owing to its pleasant weather during peak season. Famous for its lush green valleys.",
+    "name": "Naran Kaghan",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Lake_Saif_ul_Malook.jpg/1200px-Lake_Saif_ul_Malook.jpg"
+  },
+  "Swat": {
+    "description": "Known as the Switzerland of Pakistan due to its stunning green valleys and scenic mountain views.",
+    "name": "Swat Valley",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/76/Swat_valley_view.jpg"
+  },
+  "Murree": {
+    "description": "Famous for its scenic beauty, lush green hills, and cool climate, it is a popular hill station in Pakistan.",
+    "name": "Murree",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Murree_Hills.jpg/1200px-Murree_Hills.jpg"
+  },
+  "Skardu": {
+    "description": "Known for its breathtaking landscapes, including Shigar Fort and the beautiful Shangrila Resort.",
+    "name": "Skardu",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Shangrila_Resort%2C_Skardu.jpg/800px-Shangrila_Resort%2C_Skardu.jpg"
+  },
+  "Fairy Meadows": {
+    "description": "A lush green plateau with views of Nanga Parbat, the ninth-highest mountain in the world.",
+    "name": "Fairy Meadows",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Fairy_Meadows.jpg/800px-Fairy_Meadows.jpg"
+  },
+  "Lahore": {
+    "description": "Known for its historical landmarks such as Badshahi Mosque, Lahore Fort, and vibrant culture.",
+    "name": "Lahore",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Badshahi_Mosque_in_Lahore.jpg/1200px-Badshahi_Mosque_in_Lahore.jpg"
+  },
+  "Karimabad": {
+    "description": "The main town in Hunza, known for its rich culture, beautiful valleys, and the ancient Baltit Fort.",
+    "name": "Karimabad",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Karimabad_Hunza.jpg/800px-Karimabad_Hunza.jpg"
+  },
+  "Ratti Gali Lake": {
+    "description": "A high-altitude alpine glacial lake located in Azad Kashmir, known for its turquoise waters.",
+    "name": "Ratti Gali Lake",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Ratti_Gali_Lake.jpg/800px/Ratti_Gali_Lake.jpg"
+  },
+  "Ziarat": {
+    "description": "Famous for its Juniper forests and historical significance, Ziarat is a peaceful hill station.",
+    "name": "Ziarat",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Juniper_Forest_Ziarat.jpg/800px-Juniper_Forest_Ziarat.jpg"
+  },
+  "Islamabad": {
+    "description": "The capital of Pakistan, known for its lush greenery, landmarks like Faisal Mosque, and scenic trails.",
+    "name": "Islamabad",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Faisal_Mosque_2015.jpg/1200px-Faisal_Mosque_2015.jpg"
+  },
+  "Balakot": {
+    "description": "A popular spot for nature lovers with serene landscapes and a base for treks to the Naran-Kaghan valley.",
+    "name": "Balakot",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Balakot.jpg/800px-Balakot.jpg"
+  },
+  "Attabad Lake": {
+    "description": "A beautiful lake formed after a landslide in 2010, known for its stunning turquoise waters.",
+    "name": "Attabad Lake",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Attabad_Lake.jpg/800px-Attabad_Lake.jpg"
+  },
+  "Chitral": {
+    "description": "A peaceful area located in the north-western region of Pakistan, known for its natural beauty and cultural diversity.",
+    "name": "Chitral",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Chitral.jpg/800px-Chitral.jpg"
+  },
+  "Khunjerab Pass": {
+    "description": "The highest paved international border crossing in the world, connecting Pakistan to China.",
+    "name": "Khunjerab Pass",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Khunjerab_Pass.jpg/800px-Khunjerab_Pass.jpg"
+  },
+  "Gilgit": {
+    "description": "A major city in the Gilgit-Baltistan region, known for its stunning mountain views and trekking routes.",
+    "name": "Gilgit",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Gilgit.jpg/800px-Gilgit.jpg"
+  },
+  "Kotli": {
+    "description": "A beautiful city in Azad Kashmir, known for its pleasant weather and scenic valleys.",
+    "name": "Kotli",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Kotli.jpg/800px-Kotli.jpg"
+  },
+  "Neelum Valley": {
+    "description": "Known for its lush greenery, waterfalls, and rivers, it is a popular tourist destination in Azad Kashmir.",
+    "name": "Neelum Valley",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Neelum_Valley.jpg/800px-Neelum_Valley.jpg"
+  }
+}
