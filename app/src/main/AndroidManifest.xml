@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.travelplannerapp">
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.Travelplannerapp"
+    tools:targetApi="31">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,19 +13,19 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name="com.Travelplannerfyp.travelplannerapp.TravelPlannerApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_logo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Travelplannerapp"
-        tools:targetApi="31">
+        android:theme="@style/Theme.Travelplannerapp">
 
-        <!-- Activities -->
+        <!-- Launcher Activity -->
         <activity
-            android:name=".SplashActivity"
+            android:name="com.Travelplannerfyp.travelplannerapp.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Travelplannerapp.NoActionBar">
             <intent-filter>
@@ -29,26 +33,45 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity 
-            android:name=".MainActivity"
-            android:exported="false" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".DetailActivity" />
-        <activity android:name=".PropertyListingActivity" />
-        <activity android:name=".PropertyBrowseActivity" />
-        <activity android:name=".PropertyDetailActivity" />
-        <activity 
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity 
-            android:name=".RegisterActivity"
-            android:exported="false" />
-        <activity 
-            android:name=".OtpVerificationActivity"
-            android:exported="false" />
-        <activity 
-            android:name=".ForgotPasswordActivity"
-            android:exported="false" />
+
+        <!-- Onboarding Screens -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding1" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding2" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding3" android:exported="false" />
+
+        <!-- Authentication -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.LoginActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.RegisterActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.OtpVerificationActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.ForgotPasswordActivity" android:exported="false" />
+
+        <!-- Main App Screens -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.MainActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.activity_choose_role" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.organizermain" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.profile" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.ProfileActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PlaceDetailActivity" android:exported="false" />
+
+        <!-- Trip Planning -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PlanTripActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.trips_planned" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.trips_planned_activity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.TripDetailActivity" android:exported="false" />
+
+        <!-- Property/Hotel Section -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PropertyBrowseActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PropertyListingActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PropertyDetailActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.HotelDetailActivity" android:exported="false" />
+
+        <!-- Booking System -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PropertyBookingActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.TripBookingActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.MyBookingsActivity" android:exported="false" />
+
+        <!-- Miscellaneous -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.DetailActivity" android:exported="false" />
 
     </application>
 

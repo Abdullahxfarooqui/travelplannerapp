@@ -9,6 +9,8 @@ buildscript {
     dependencies {
         // Add the Google Services classpath for Firebase
         classpath("com.google.gms:google-services:4.4.2")
+        // Add Hilt AGP Plugin
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.48")
     }
 }
 

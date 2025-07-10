@@ -1,47 +1,66 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="250dp"
-    android:layout_height="wrap_content"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/strokeLight"
+    android:clickable="true"
+    android:focusable="true"
+    style="@style/CardViewStyle">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:layout_marginEnd="8dp"
-    android:gravity="center_vertical">
+    android:padding="0dp">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/tripImageView"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="180dp"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/RoundedImageStyle"
+        app:shapeAppearanceOverlay="@style/RoundedTopImageStyle"
         android:src="@drawable/placeholder_image" />
 
-    <TextView
-        android:id="@+id/availableTripsTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Trip Title"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:padding="16dp">
+        
+        <TextView
+            android:id="@+id/availableTripsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trip Title"
+            android:textSize="18sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextHeadingStyle" />
 
-    <TextView
-        android:id="@+id/tripLocationTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Location"
-        android:textColor="#000000"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
-    <TextView
-        android:id="@+id/tripDescriptionTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="#000000"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:text="Description"/>
-
-
+        <TextView
+            android:id="@+id/tripLocationTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            style="@style/TextSubheadingStyle" />
+            
+        <TextView
+            android:id="@+id/tripDescriptionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Description"
+            style="@style/TextBodyStyle"/>
+    </LinearLayout>
 </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -7,7 +7,7 @@
     <item
         android:id="@+id/nav_browse"
         android:icon="@android:drawable/ic_menu_search"
-        android:title="Find a Place" />
+        android:title="Planned Trips" />
     <item
         android:id="@+id/nav_rent"
         android:icon="@android:drawable/ic_menu_add"
