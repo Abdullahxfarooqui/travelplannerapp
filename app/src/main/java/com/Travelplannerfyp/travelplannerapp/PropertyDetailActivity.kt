@@ -84,6 +84,8 @@ class PropertyDetailActivity : AppCompatActivity() {
                 .child(propertyId!!)
                 .removeEventListener(it)
         }
+        // Clear the adapter to prevent state restoration issues
+        imageViewPager.adapter = null
     }
 
     private fun initializeViews() {

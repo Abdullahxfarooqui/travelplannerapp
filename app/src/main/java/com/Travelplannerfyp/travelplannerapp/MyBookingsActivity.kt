@@ -267,6 +267,14 @@ class MyBookingsActivity : AppCompatActivity() {
             CurrencyUtils.formatAsPKR(booking.serviceFee)
         dialogView.findViewById<TextView>(R.id.bookingTotalAmountText).text = 
             CurrencyUtils.formatAsPKR(booking.totalAmount)
+        // Show hotel charges for trip bookings
+        val hotelChargesText = dialogView.findViewById<TextView>(R.id.bookingHotelChargesText)
+        if (booking.bookingType == BookingType.TRIP) {
+            val hotelCharges = booking.totalAmount - booking.basePrice - booking.serviceFee
+            hotelChargesText.text = CurrencyUtils.formatAsPKR(hotelCharges)
+        } else {
+            hotelChargesText.text = CurrencyUtils.formatAsPKR(0.0)
+        }
         
         // Set host information
         dialogView.findViewById<TextView>(R.id.bookingHostNameText).text = booking.hostName

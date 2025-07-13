@@ -11,6 +11,15 @@ android {
     namespace = "com.Travelplannerfyp.travelplannerapp"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("release/travelplanner.keystore")
+            storePassword = "travelplanner"
+            keyAlias = "travelplannerkey"
+            keyPassword = "travelplanner"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -37,6 +46,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

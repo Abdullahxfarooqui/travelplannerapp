@@ -8,9 +8,14 @@ data class Hotel(
     val name: String = "",
     val description: String = "",
     val rating: Double = 0.0,
-    val price: String = "",
+    val pricePerNight: String = "", // Changed from price to pricePerNight for clarity
     val imageName: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val amenities: List<String> = emptyList() // Added amenities field
 ) : Parcelable {
-    constructor() : this("", "", 0.0, "", "", "")
+    // For backward compatibility
+    val price: String
+        get() = pricePerNight
+        
+    constructor() : this("", "", 0.0, "", "", "", emptyList())
 }

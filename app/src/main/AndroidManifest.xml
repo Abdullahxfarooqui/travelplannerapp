@@ -17,9 +17,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher_logo"
+        android:icon="@drawable/ic_launcher_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_launcher_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.Travelplannerapp">
 
@@ -58,6 +58,7 @@
         <activity android:name="com.Travelplannerfyp.travelplannerapp.trips_planned" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.trips_planned_activity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.TripDetailActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.PlannedTripsTabbedActivity" android:exported="false" />
 
         <!-- Property/Hotel Section -->
         <activity android:name="com.Travelplannerfyp.travelplannerapp.PropertyBrowseActivity" android:exported="false" />
@@ -72,6 +73,7 @@
 
         <!-- Miscellaneous -->
         <activity android:name="com.Travelplannerfyp.travelplannerapp.DetailActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.TestPlannedTripsActivity" android:exported="false" />
 
     </application>
 

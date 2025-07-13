@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.Travelplannerfyp.travelplannerapp.R
 import java.util.Calendar
+import com.Travelplannerfyp.travelplannerapp.models.ItineraryItem
 
 class PlanTripActivity : AppCompatActivity() {
     private lateinit var placeNameTextView: TextView
@@ -30,8 +32,10 @@ class PlanTripActivity : AppCompatActivity() {
     private lateinit var organizerPhoneEditText: EditText
     private lateinit var startDateEditText: EditText
     private lateinit var endDateEditText: EditText
+    private lateinit var tripPriceEditText: EditText
     private lateinit var seatsAvailableEditText: EditText
     private lateinit var createTripButton: Button
+    private lateinit var visibilityRadioGroup: RadioGroup
 
     // Data
     private var selectedHotels: List<Hotel> = emptyList()
@@ -61,8 +65,10 @@ class PlanTripActivity : AppCompatActivity() {
         organizerPhoneEditText = findViewById(R.id.organizer_phone)
         startDateEditText = findViewById(R.id.start_date)
         endDateEditText = findViewById(R.id.end_date)
+        tripPriceEditText = findViewById(R.id.trip_price)
         seatsAvailableEditText = findViewById(R.id.seats_available)
         createTripButton = findViewById(R.id.createTripButton)
+        visibilityRadioGroup = findViewById(R.id.visibilityRadioGroup)
     }
 
     private fun extractIntentData() {
@@ -123,23 +129,45 @@ class PlanTripActivity : AppCompatActivity() {
             val organizerPhone = organizerPhoneEditText.text.toString().trim()
             val startDate = startDateEditText.text.toString().trim()
             val endDate = endDateEditText.text.toString().trim()
+            val tripPrice = tripPriceEditText.text.toString().trim()
             val seatsAvailable = seatsAvailableEditText.text.toString().trim()
 
-            if (listOf(tripDescription, organizerName, organizerPhone, startDate, endDate, seatsAvailable).any { it.isEmpty() }) {
+            if (listOf(tripDescription, organizerName, organizerPhone, startDate, endDate, tripPrice, seatsAvailable).any { it.isEmpty() }) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val organizerId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            val tripData = buildTripData(
-                tripDescription,
-                organizerName,
-                organizerPhone,
-                startDate,
-                endDate,
-                seatsAvailable,
-                organizerId
+            val visibility = if (visibilityRadioGroup.checkedRadioButtonId == R.id.publicRadioButton) {
+                "PUBLIC"
+            } else {
+                "PRIVATE"
+            }
+            // When creating a trip, pass a sample itinerary for now
+            // In the future, collect itinerary from user input
+            val sampleItinerary = listOf(
+                ItineraryItem("09:00 AM", "Breakfast at hotel", "Enjoy a buffet breakfast at the main restaurant."),
+                ItineraryItem("11:00 AM", "Guided City Tour", "Explore the city's top attractions with a local guide."),
+                ItineraryItem("02:00 PM", "Lunch at Cafe", "Lunch at a popular local cafe."),
+                ItineraryItem("04:00 PM", "Hiking", "Scenic hike to the viewpoint.")
             )
+            val tripData = try {
+                buildTripData(
+                    tripDescription,
+                    organizerName,
+                    organizerPhone,
+                    startDate,
+                    endDate,
+                    tripPrice,
+                    seatsAvailable,
+                    organizerId,
+                    visibility,
+                    sampleItinerary // Pass the itinerary here
+                )
+            } catch (e: IllegalArgumentException) {
+                Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             saveTripToFirebase(tripData)
         }
@@ -151,10 +179,28 @@ class PlanTripActivity : AppCompatActivity() {
         phone: String,
         start: String,
         end: String,
+        price: String,
         seats: String,
-        userId: String
+        userId: String,
+        visibility: String,
+        itinerary: List<ItineraryItem> // NEW
     ): Map<String, Any> {
-        return mapOf(
+        val hotelMap = selectedHotels.firstOrNull()?.let {
+            val priceDouble = it.pricePerNight.toDoubleOrNull()
+            if (priceDouble == null) {
+                throw IllegalArgumentException("Hotel price per night must be a valid number")
+            }
+            mapOf(
+                "name" to it.name,
+                "pricePerNight" to priceDouble,
+                "rating" to it.rating,
+                "imageUrl" to it.imageUrl,
+                "description" to it.description,
+                "imageName" to it.imageName,
+                "amenities" to it.amenities // Save amenities as a list
+            )
+        }
+        val tripMap = mutableMapOf<String, Any>(
             "placeName" to selectedPlaceName,
             "placeDescription" to selectedPlaceDescription,
             "tripDescription" to description,
@@ -163,17 +209,23 @@ class PlanTripActivity : AppCompatActivity() {
             "startDate" to start,
             "endDate" to end,
             "seatsAvailable" to seats,
-            "selectedHotels" to selectedHotels.map {
-                mapOf(
-                    "name" to it.name,
-                    "price" to it.price,
-                    "rating" to it.rating,
-                    "imageUrl" to it.imageUrl
-                )
-            },
+            "pricePerPerson" to price, // Use actual price from user input
             "organizerId" to userId,
-            "placeImageUrl" to selectedPlaceImage
+            "placeImageUrl" to selectedPlaceImage,
+            "placeImageName" to selectedPlaceImage, // Add this line for drawable loading
+            "visibility" to visibility,
+            "itinerary" to itinerary.map {
+                mapOf(
+                    "time" to it.time,
+                    "title" to it.title,
+                    "description" to it.description
+                )
+            }
         )
+        if (hotelMap != null) {
+            tripMap["hotel"] = hotelMap
+        }
+        return tripMap
     }
 
     private fun saveTripToFirebase(tripData: Map<String, Any>) {

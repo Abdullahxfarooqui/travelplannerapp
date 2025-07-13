@@ -11,6 +11,8 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.squareup.picasso.Picasso
 import java.util.regex.Pattern
 import com.Travelplannerfyp.travelplannerapp.R
+import android.widget.LinearLayout
+import android.widget.Toast
 
 class HotelDetailActivity : AppCompatActivity() {
 
@@ -46,7 +48,12 @@ class HotelDetailActivity : AppCompatActivity() {
 
         nameTextView.text = hotelName
         descriptionTextView.text = hotelDescription
-        priceTextView.text = hotelPrice
+        // Show price as Rs. <amount>/night if available
+        if (hotelPrice != "Price not available" && hotelPrice.isNotBlank()) {
+            priceTextView.text = "Rs. ${hotelPrice}/night"
+        } else {
+            priceTextView.text = "Price not set"
+        }
         ratingBar.rating = hotelRating.toFloat()
         ratingText.text = String.format("%.1f/5", hotelRating)
         
@@ -121,6 +128,35 @@ class HotelDetailActivity : AppCompatActivity() {
         } else {
             Log.d("HotelDetailActivity", "No image URL or name available, using placeholder")
             imageView.setImageResource(R.drawable.placeholder_image) // Default placeholder
+        }
+
+        // Get amenities from intent
+        val amenities = intent.getStringArrayListExtra("amenities")
+        val amenitiesContainer = findViewById<LinearLayout>(R.id.amenities_container)
+        amenitiesContainer?.removeAllViews()
+        if (amenities != null && amenities.isNotEmpty()) {
+            for (amenity in amenities) {
+                val tv = TextView(this)
+                tv.text = amenity
+                tv.setPadding(16, 8, 16, 8)
+                tv.setBackgroundResource(R.drawable.amenity_chip_background)
+                tv.setTextColor(resources.getColor(R.color.primary, null))
+                val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                params.setMargins(8, 8, 8, 8)
+                tv.layoutParams = params
+                amenitiesContainer.addView(tv)
+            }
+        } else {
+            val tv = TextView(this)
+            tv.text = "No amenities listed"
+            tv.setTextColor(resources.getColor(R.color.textSecondary, null))
+            amenitiesContainer.addView(tv)
+        }
+
+        // Book Now button logic
+        val bookHotelButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_book_hotel)
+        bookHotelButton.setOnClickListener {
+            Toast.makeText(this, "Hotel booking feature coming soon!", Toast.LENGTH_SHORT).show()
         }
     }
     

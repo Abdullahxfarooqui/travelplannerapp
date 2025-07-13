@@ -86,7 +86,8 @@
     <!-- Divider -->
     <color name="divider_color">#E0E0E0</color>
 
-
+    <color name="vibrantAccent">#2979FF</color>
+    <color name="teal_700">#018786</color>
 
 
 </resources>

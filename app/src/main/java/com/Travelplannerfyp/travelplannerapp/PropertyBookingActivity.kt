@@ -49,6 +49,7 @@ class PropertyBookingActivity : AppCompatActivity() {
     private lateinit var bookNowButton: MaterialButton
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var contentLayout: ScrollView
+    private lateinit var contentInnerLayout: LinearLayout
     
     private var property: PropertyListing? = null
     private var selectedCheckInDate: Calendar? = null
@@ -97,6 +98,7 @@ class PropertyBookingActivity : AppCompatActivity() {
         bookNowButton = findViewById(R.id.bookNowButton)
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
         contentLayout = findViewById(R.id.contentLayout)
+        contentInnerLayout = findViewById(R.id.contentInnerLayout)
     }
     
     private fun setupToolbar() {

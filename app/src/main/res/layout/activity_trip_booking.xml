@@ -64,13 +64,23 @@
                         android:textColor="@color/textPrimary"
                         android:layout_marginBottom="16dp" />
 
-                    <ImageView
-                        android:id="@+id/tripImageView"
+                    <!-- Professional styled trip image -->
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:scaleType="centerCrop"
-                        android:background="@drawable/placeholder_property"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="12dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="6dp"
+                        app:cardUseCompatPadding="true">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/tripImageView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:contentDescription="@string/trip_image"
+                            app:shapeAppearanceOverlay="@style/RoundedImage" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <TextView
                         android:id="@+id/tripNameTextView"
@@ -223,6 +233,7 @@
 
             <!-- Pricing Breakdown Card -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pricingBreakdownCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -250,80 +261,49 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Price per Person"
-                            android:textColor="@color/textSecondary" />
-
-                        <TextView
-                            android:id="@+id/pricePerPersonTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="16sp"
-                            android:textColor="@color/textPrimary"
-                            tools:text="$150.00 per person" />
-
+                        android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Trip Price (per person):" />
+                        <TextView android:id="@+id/pricePerPersonTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rs. 0" android:textStyle="bold" />
                     </LinearLayout>
-
-                    <!-- Service Fee -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Service Fee"
-                            android:textColor="@color/textSecondary" />
-
-                        <TextView
-                            android:id="@+id/serviceFeeTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="16sp"
-                            android:textColor="@color/textPrimary"
-                            tools:text="$15.00" />
-
+                        android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Hotel Price (per night):" />
+                        <TextView android:id="@+id/hotelPricePerNightTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rs. 0" android:textStyle="bold" />
                     </LinearLayout>
-
-                    <!-- Divider -->
-                    <View
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Total Amount -->
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Nights:" />
+                        <TextView android:id="@+id/hotelNightsTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Hotel Total:" />
+                        <TextView android:id="@+id/hotelTotalTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rs. 0" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Service Fee (10%):" />
+                        <TextView android:id="@+id/serviceFeeTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rs. 0" android:textStyle="bold" />
+                    </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginVertical="8dp" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Total Amount"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/textPrimary" />
-
-                        <TextView
-                            android:id="@+id/totalAmountTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            tools:text="$165.00" />
-
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Total:" android:textStyle="bold" />
+                        <TextView android:id="@+id/totalAmountTextView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rs. 0" android:textStyle="bold" android:textColor="@color/primary" />
                     </LinearLayout>
 
                 </LinearLayout>

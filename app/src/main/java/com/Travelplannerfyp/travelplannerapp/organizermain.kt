@@ -273,7 +273,7 @@ class organizermain :AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         try {
             when (item.itemId) {
                 R.id.nav_profile -> startActivity(Intent(this, profile::class.java))
-                R.id.nav_trips_planned -> startActivity(Intent(this, trips_planned::class.java))
+                R.id.nav_trips_planned -> startActivity(Intent(this, PlannedTripsTabbedActivity::class.java))
                 R.id.nav_plan_trip -> startActivity(Intent(this, PlanTripActivity::class.java))
                 R.id.nav_logout -> logoutUser()
                 R.id.nav_switch_user -> switchToUser()

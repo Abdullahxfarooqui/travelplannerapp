@@ -52,12 +52,18 @@ class TripBookingActivity : AppCompatActivity() {
     private lateinit var bookNowButton: MaterialButton
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var contentLayout: ScrollView
+    private lateinit var priceBreakdownTextView: TextView
     
     private var trip: Trip? = null
     private var numberOfSeats: Int = 1
     private var availableSeats: Int = 0
     private var tripKey: String? = null
     private var tripValueListener: ValueEventListener? = null
+    private var hotelPricePerNight: Double = 0.0
+    private var hotelNights: Int = 1
+    private var hotelImageUrl: String? = null
+    private var fallbackTripImageUrl: String? = null
+    private var tripImageNameFromIntent: String? = null
     
     companion object {
         private const val TAG = "TripBookingActivity"
@@ -68,11 +74,35 @@ class TripBookingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "TripBookingActivity onCreate started")
         setContentView(R.layout.activity_trip_booking)
-        
+        // Get hotel info from intent
+        hotelPricePerNight = intent.getStringExtra("hotelPricePerNight")?.toDoubleOrNull() ?: 0.0
+        hotelImageUrl = intent.getStringExtra("hotelImageUrl")
+        fallbackTripImageUrl = intent.getStringExtra("tripImageUrl")
+        tripImageNameFromIntent = intent.getStringExtra("tripImageName")
+        // Calculate nights from trip dates if possible
+        val startDate = intent.getStringExtra("startDate")
+        val endDate = intent.getStringExtra("endDate")
+        hotelNights = try {
+            if (!startDate.isNullOrBlank() && !endDate.isNullOrBlank()) {
+                val sdf = java.text.SimpleDateFormat("dd/MM/yyyy")
+                val start = sdf.parse(startDate)
+                val end = sdf.parse(endDate)
+                val diff = (end.time - start.time) / (1000 * 60 * 60 * 24)
+                (if (diff > 0) diff else 1).toInt()
+            } else 1
+        } catch (e: Exception) { 1 }
         initializeViews()
         setupToolbar()
         setupBookButton() // Setup button first, but it will be enabled/disabled based on data
         loadTripDetails() // Load trip details last, this will update UI
+        priceBreakdownTextView = TextView(this).apply {
+            id = View.generateViewId()
+            textSize = 15f
+            setTextColor(resources.getColor(R.color.textPrimary, null))
+            setPadding(0, 8, 0, 8)
+        }
+        val pricingCard = findViewById<com.google.android.material.card.MaterialCardView>(R.id.pricingBreakdownCard)
+        (pricingCard?.getChildAt(0) as? LinearLayout)?.addView(priceBreakdownTextView, 1)
         Log.d(TAG, "TripBookingActivity onCreate completed")
     }
     
@@ -308,7 +338,14 @@ class TripBookingActivity : AppCompatActivity() {
     
     private fun createTripFromData(data: Map<*, *>, tripKey: String): Trip {
         val seatsAvailable = (data["seatsAvailable"] as? String)?.toIntOrNull() ?: 0
-        val pricePerPerson = (data["tripPrice"] as? String)?.toDoubleOrNull() ?: 150.0
+        
+        // Fetch real-time price from Firebase - check multiple possible price fields
+        val pricePerPerson = when {
+            data["tripPrice"] != null -> (data["tripPrice"] as? String)?.toDoubleOrNull() ?: 150.0
+            data["pricePerPerson"] != null -> (data["pricePerPerson"] as? String)?.toDoubleOrNull() ?: 150.0
+            data["price"] != null -> (data["price"] as? String)?.toDoubleOrNull() ?: 150.0
+            else -> 150.0 // Default price if no price field found
+        }
         
         Log.d(TAG, "Creating trip from Firebase data - Seats: $seatsAvailable, Price: $pricePerPerson")
         
@@ -323,7 +360,8 @@ class TripBookingActivity : AppCompatActivity() {
             startDate = data["startDate"] as? String ?: "",
             endDate = data["endDate"] as? String ?: "",
             pricePerPerson = pricePerPerson,
-            imageUrl = data["placeImageUrl"] as? String ?: ""
+            imageUrl = data["placeImageUrl"] as? String ?: "",
+            imageName = data["placeImageName"] as? String // Always set from Firebase for drawable loading
         )
     }
     
@@ -346,16 +384,74 @@ class TripBookingActivity : AppCompatActivity() {
         availableSeatsTextView.text = "Available Seats: $availableSeats"
         
         Log.d(TAG, "Trip UI updated - Name: ${trip.name}, Seats: $availableSeats, Start: $formattedStartDate, End: $formattedEndDate")
-        
-        // Load trip image if available
-        if (!trip.imageUrl.isNullOrEmpty()) {
-            // Use your preferred image loading library (Picasso, Glide, etc.)
-            // Picasso.get().load(trip.imageUrl).into(tripImageView)
+
+        // Debug log for image URLs
+        Log.d(TAG, "Trip imageUrl: ${trip.imageUrl}, fallbackTripImageUrl: $fallbackTripImageUrl, hotelImageUrl: $hotelImageUrl, tripImageNameFromIntent: $tripImageNameFromIntent")
+
+        // Load trip image: prefer drawable by imageName from intent, then trip.imageName, else fallbackTripImageUrl (URL), else hotelImageUrl (URL), else placeholder
+        val imageName = tripImageNameFromIntent ?: trip.imageName
+        if (!imageName.isNullOrEmpty()) {
+            val resourceId = resources.getIdentifier(imageName, "drawable", packageName)
+            if (resourceId != 0) {
+                tripImageView.setImageResource(resourceId)
+                Log.d(TAG, "Loaded trip image from drawable: $imageName")
+            } else {
+                tripImageView.setImageResource(R.drawable.placeholder_image)
+                Log.d(TAG, "Drawable not found for imageName: $imageName, using placeholder")
+            }
+        } else if (!fallbackTripImageUrl.isNullOrEmpty()) {
+            com.squareup.picasso.Picasso.get()
+                .load(fallbackTripImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .into(tripImageView)
+            Log.d(TAG, "Loaded trip image from fallbackTripImageUrl: $fallbackTripImageUrl")
+        } else if (!hotelImageUrl.isNullOrEmpty()) {
+            com.squareup.picasso.Picasso.get()
+                .load(hotelImageUrl)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .into(tripImageView)
+            Log.d(TAG, "Loaded trip image from hotelImageUrl: $hotelImageUrl")
+        } else {
+            tripImageView.setImageResource(R.drawable.placeholder_image)
+            Log.d(TAG, "No image found, using placeholder")
         }
-        
+
+        // Set hotelNights based on trip start and end dates
+        hotelNights = try {
+            val sdf = java.text.SimpleDateFormat("dd/MM/yyyy")
+            val start = sdf.parse(trip.startDate ?: "")
+            val end = sdf.parse(trip.endDate ?: "")
+            val diff = (end.time - start.time) / (1000 * 60 * 60 * 24)
+            (if (diff > 0) diff else 1).toInt()
+        } catch (e: Exception) { 1 }
+
         // Setup seats spinner and update UI
         setupSeatsSpinner()
         updateSeatAvailabilityUI()
+        
+        // Always fetch latest hotel price from Firebase before calculating pricing
+        val tripId = intent.getStringExtra(EXTRA_TRIP_ID)
+        if (!tripId.isNullOrEmpty()) {
+            val hotelRef = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("hotel")
+            hotelRef.child("pricePerNight").addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
+                override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                    val price = when (val v = snapshot.value) {
+                        is Number -> v.toDouble()
+                        is String -> v.toDoubleOrNull() ?: 0.0
+                        else -> 0.0
+                    }
+                    hotelPricePerNight = price
+                    calculatePricing()
+                }
+                override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                    calculatePricing() // fallback to whatever value is present
+                }
+            })
+        } else {
+            calculatePricing()
+        }
         
         Log.d(TAG, "Trip UI update completed with $availableSeats seats available")
     }
@@ -495,15 +591,27 @@ class TripBookingActivity : AppCompatActivity() {
     
     private fun calculatePricing() {
         val trip = this.trip ?: return
-        
         val pricePerPerson = trip.pricePerPerson
         val baseAmount = pricePerPerson * numberOfSeats
-        val serviceFee = baseAmount * 0.10 // 10% service fee
-        val totalAmount = baseAmount + serviceFee
-        
+        val hotelTotal = hotelPricePerNight * hotelNights * numberOfSeats
+        val serviceFee = (baseAmount + hotelTotal) * 0.10 // 10% service fee
+        val totalAmount = baseAmount + hotelTotal + serviceFee
         pricePerPersonTextView.text = CurrencyUtils.formatAsPKR(pricePerPerson) + " per person"
+        findViewById<TextView>(R.id.hotelPricePerNightTextView)?.text = CurrencyUtils.formatAsPKR(hotelPricePerNight) + "/night"
+        findViewById<TextView>(R.id.hotelNightsTextView)?.text = hotelNights.toString()
+        findViewById<TextView>(R.id.hotelTotalTextView)?.text = CurrencyUtils.formatAsPKR(hotelPricePerNight) + " x $hotelNights night(s) x $numberOfSeats = " + CurrencyUtils.formatAsPKR(hotelTotal)
         serviceFeeTextView.text = CurrencyUtils.formatAsPKR(serviceFee)
         totalAmountTextView.text = CurrencyUtils.formatAsPKR(totalAmount)
+
+        // Detailed breakdown string
+        val breakdown = """
+            Trip Price: ${CurrencyUtils.formatAsPKR(pricePerPerson)} x $numberOfSeats = ${CurrencyUtils.formatAsPKR(baseAmount)}
+            Hotel Price: ${CurrencyUtils.formatAsPKR(hotelPricePerNight)} x $hotelNights night(s) x $numberOfSeats = ${CurrencyUtils.formatAsPKR(hotelTotal)}
+            Service Fee (10%): ${CurrencyUtils.formatAsPKR(serviceFee)}
+            -----------------------------
+            Total: ${CurrencyUtils.formatAsPKR(totalAmount)}
+        """.trimIndent()
+        priceBreakdownTextView.text = breakdown
     }
     
     private fun showBookingConfirmation() {
@@ -538,8 +646,9 @@ class TripBookingActivity : AppCompatActivity() {
     private fun calculateTotalAmount(): Double {
         val trip = this.trip ?: return 0.0
         val baseAmount = trip.pricePerPerson * numberOfSeats
-        val serviceFee = baseAmount * 0.10
-        return baseAmount + serviceFee
+        val hotelTotal = hotelPricePerNight * hotelNights * numberOfSeats
+        val serviceFee = (baseAmount + hotelTotal) * 0.10
+        return baseAmount + hotelTotal + serviceFee
     }
     
     private fun createBooking() {

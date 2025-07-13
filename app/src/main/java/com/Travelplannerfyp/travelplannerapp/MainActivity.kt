@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private var currentFragment: Fragment? = null
 
     private val homeFragment = HomeFragment()
-    private val plannedTripsFragment = MyPlannedTripsFragment()
+    private val plannedTripsFragment = UserPlannedTripsFragment()
     private val rentFragment = RentFragment()
     private val profileFragment = ProfileFragment()
 
@@ -140,6 +140,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadProfileImage()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clear any ViewPager2 adapters to prevent FragmentStateAdapter crashes
+        currentFragment?.let { fragment ->
+            if (fragment is UserPlannedTripsFragment) {
+                // The fragment will handle its own adapter clearing in onDestroyView
+            }
+        }
     }
 
 

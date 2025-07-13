@@ -56,6 +56,18 @@
                 android:textStyle="bold"
                 tools:text="Hotel Name" />
 
+            <EditText
+                android:id="@+id/hotel_price_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Price per night (PKR)"
+                android:inputType="numberDecimal"
+                android:textColor="#212121"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:background="@android:drawable/edit_text"
+                android:padding="6dp" />
+
             <RatingBar
                 android:id="@+id/hotel_rating"
                 style="?android:attr/ratingBarStyleSmall"

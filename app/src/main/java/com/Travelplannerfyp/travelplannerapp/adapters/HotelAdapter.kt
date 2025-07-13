@@ -31,6 +31,7 @@ class HotelAdapter(
         holder.hotelDescription.text = hotel.description
         holder.hotelRating.rating = hotel.rating.toFloat()  // Use rating property for RatingBar
         holder.hotelPrice.text = "Price: ${hotel.price}"
+        holder.hotelPriceInput.setText(hotel.pricePerNight)
 
         // Try to load image from URL first, then fallback to drawable resource
         if (hotel.imageUrl.isNotEmpty()) {
@@ -89,7 +90,19 @@ class HotelAdapter(
 
         // Handling add to cart click
         holder.addToCartButton.setOnClickListener {
-            onAddToCartClick(hotel)  // Call the onAddToCartClick listener
+            val priceInput = holder.hotelPriceInput.text.toString().trim()
+            if (priceInput.isEmpty()) {
+                holder.hotelPriceInput.error = "Enter price"
+                return@setOnClickListener
+            }
+            val priceDouble = priceInput.toDoubleOrNull()
+            if (priceDouble == null) {
+                holder.hotelPriceInput.error = "Invalid price"
+                return@setOnClickListener
+            }
+            // Update hotel pricePerNight as Double string for model compatibility
+            val updatedHotel = hotel.copy(pricePerNight = priceDouble.toString())
+            onAddToCartClick(updatedHotel)
         }
     }
 
@@ -158,5 +171,6 @@ class HotelAdapter(
         val hotelPrice: TextView = itemView.findViewById(R.id.hotel_price)
         val hotelImage: ImageView = itemView.findViewById(R.id.hotel_image)
         val addToCartButton: ImageButton = itemView.findViewById(R.id.btn_add_to_cart)
+        val hotelPriceInput: android.widget.EditText = itemView.findViewById(R.id.hotel_price_input)
     }
 }

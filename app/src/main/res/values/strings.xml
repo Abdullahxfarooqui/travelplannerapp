@@ -6,4 +6,5 @@
     <string name="onboarding1_description"> At Friends tours and travel, we customize reliable and trustworthy tours to destinations all over the world </string>
     <string name="onboarding2_description"> Live your life by a compass, not a clock. Don\'t listen to what they say. Go see </string>
     <string name="onboarding3_description"> Traveling is more than just moving from one place to another; it\'s an invitation to step out of your comfort zone and explore the unknown. </string>
+    <string name="trip_image">Trip image</string>
 </resources>
