@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:orientation="vertical"
+    android:background="@drawable/nav_header_gradient"
+    android:padding="24dp"
+    android:gravity="center"
+    android:id="@+id/nav_header_layout">
+
+    <!-- Profile Image with Circular Background -->
+    <FrameLayout
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="4dp" />
+
+        <ImageView
+            android:id="@+id/nav_header_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_user"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:layout_margin="8dp" />
+    </FrameLayout>
+
+    <!-- User Name -->
+    <TextView
+        android:id="@+id/nav_header_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:layout_gravity="center"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="2" />
+
+    <!-- Subtitle/Status -->
+    <TextView
+        android:id="@+id/nav_header_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Travel Enthusiast"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:alpha="0.9" />
+
+</LinearLayout>

@@ -1,0 +1,41 @@
+# Privacy Policy for Travel Planner
+
+**Effective Date:** [Replace with today’s date]
+
+Travel Planner ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application ("App").
+
+## Information We Collect
+- **Personal Information:** Email address, name, and other information you provide during registration or login.
+- **Usage Data:** Information about how you use the app, such as features accessed and time spent.
+- **Device Information:** Device type, operating system, and unique device identifiers.
+- **Location Data:** If you enable location services, we may collect your device’s location to provide map and navigation features.
+- **Photos and Media:** If you use features that require access to your camera or storage, we may access your photos or media files.
+
+## How We Use Your Information
+- To provide and maintain the app’s features.
+- To personalize your experience.
+- To improve our app and develop new features.
+- To communicate with you about updates or support.
+- To comply with legal obligations.
+
+## Sharing Your Information
+We do not sell or rent your personal information. We may share information with:
+- Service providers who help us operate the app.
+- Law enforcement or government agencies if required by law.
+
+## Your Choices
+- You can access and update your information in the app.
+- You can disable location access in your device settings.
+- You can delete your account by contacting support@travelplanner.app.
+
+## Security
+We use reasonable measures to protect your information, but no method of transmission is 100% secure.
+
+## Children’s Privacy
+Our app is not intended for children under 13. We do not knowingly collect data from children under 13.
+
+## Changes to This Policy
+We may update this policy from time to time. We will notify you of any changes by updating the date at the top of this policy.
+
+## Contact Us
+If you have questions, contact us at: support@travelplanner.app 

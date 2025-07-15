@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/strokeLight"
+    android:clickable="true"
+    android:focusable="true"
+    style="@style/CardViewStyle">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/propertyImageView"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            app:shapeAppearanceOverlay="@style/RoundedTopImageStyle"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:src="@drawable/placeholder_image" />
+            
+        <ImageButton
+            android:id="@+id/deletePropertyButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_margin="8dp"
+            android:background="@color/accentDark"
+            android:contentDescription="Delete property"
+            android:src="@android:drawable/ic_menu_delete"
+            android:tint="@color/white"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/ownerBadgeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/badge_background"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="Your Property"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            style="@style/BadgeTextStyle"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/propertyTitleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="22sp"
+            android:layout_marginBottom="4dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextHeadingStyle"
+            app:layout_constraintTop_toBottomOf="@id/propertyImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Beautiful Beach House" />
+
+        <TextView
+            android:id="@+id/propertyLocationTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:drawableStart="@android:drawable/ic_menu_mylocation"
+            android:layout_marginBottom="4dp"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/colorPrimaryLight"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextSubheadingStyle"
+            app:layout_constraintTop_toBottomOf="@id/propertyTitleTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Lahore, Pakistan" />
+
+        <TextView
+            android:id="@+id/propertyPriceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/accentDark"
+            style="@style/PriceTextStyle"
+            app:layout_constraintTop_toBottomOf="@id/propertyLocationTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="$120 / night" />
+
+        <TextView
+            android:id="@+id/propertyGuestsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textSize="14sp"
+            android:textColor="@color/textBody"
+            android:drawablePadding="4dp"
+            style="@style/TextBodyStyle"
+            app:drawableStartCompat="@android:drawable/ic_menu_myplaces"
+            app:drawableTint="@color/colorPrimaryLight"
+            app:layout_constraintTop_toTopOf="@id/propertyPriceTextView"
+            app:layout_constraintBottom_toBottomOf="@id/propertyPriceTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="4 guests" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="8dp"
+    android:background="@drawable/rounded_edittext"
+    android:padding="4dp"
+    android:elevation="1dp">
+
+    <!-- Day Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/dayLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day 1:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:textColor="#1E1E1E"
+            android:minWidth="60dp" />
+
+        <EditText
+            android:id="@+id/activityDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="e.g., Hiking, Breakfast, City Tour"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:textColor="#424242"
+            android:textColorHint="#9E9E9E"
+            android:inputType="textMultiLine"
+            android:maxLines="3"
+            android:scrollbars="vertical" />
+
+        <ImageButton
+            android:id="@+id/expand_day_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/circle_button_background"
+            android:src="@drawable/ic_expand_more"
+            android:contentDescription="Expand Day"
+            android:layout_gravity="center_vertical" />
+
+        <ImageButton
+            android:id="@+id/remove_day_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/circle_button_background_red"
+            android:src="@drawable/ic_remove"
+            android:contentDescription="Remove Day"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Time Slots Container (Initially Hidden) -->
+    <LinearLayout
+        android:id="@+id/time_slots_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone">
+
+        <!-- Time Slots Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Time Schedule"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#3F51B5" />
+
+            <ImageButton
+                android:id="@+id/add_time_slot_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_button_background"
+                android:src="@drawable/ic_add"
+                android:contentDescription="Add Time Slot"
+                android:scaleType="fitCenter" />
+
+        </LinearLayout>
+
+        <!-- Container for Dynamic Time Slots -->
+        <LinearLayout
+            android:id="@+id/time_slots_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+
+</LinearLayout>

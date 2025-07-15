@@ -1,0 +1,452 @@
+{
+  "Hunza": {
+    "hotels": [
+      {
+        "name": "Hunza Serena Inn",
+        "description": "A luxurious hotel offering breathtaking views of the Hunza valley.",
+        "rating": 4.5,
+        "price": "12,000 per night",
+        "imageName": "hunza_serena_inn"
+      },
+      {
+        "name": "Baltit Fort Inn",
+        "description": "A beautiful heritage hotel located near Baltit Fort with stunning views.",
+        "rating": 4.6,
+        "price": "10,000rs per night",
+        "imageName": "baltit_fort_inn"
+      },
+      {
+        "name": "Eagle's Nest Hotel",
+        "description": "An eco-friendly hotel nestled in the mountains, ideal for adventure lovers.",
+        "rating": 4.7,
+        "price": "14,000rs per night",
+        "imageName": "eagles_nest_hotel"
+      }
+    ]
+  },
+  "Naran-Kaghan": {
+    "hotels": [
+      {
+        "name": "Pearl Continental Hotel Naran",
+        "description": "A luxury hotel with modern amenities and scenic views of Naran.",
+        "rating": 4.4,
+        "price": "15,000rs per night",
+        "imageName": "pc_hotel_naran"
+      },
+      {
+        "name": "Kaghan View Hotel",
+        "description": "A comfortable and budget-friendly hotel with excellent valley views.",
+        "rating": 4.2,
+        "price": "8000rs per night",
+        "imageName": "kaghan_view_hotel"
+      },
+      {
+        "name": "Shangrila Resort Naran",
+        "description": "A picturesque resort offering an amazing natural experience.",
+        "rating": 4.7,
+        "price": "18,000rs per night",
+        "imageName": "shangrila_resort_naran"
+      }
+    ]
+  },
+  "Swat": {
+    "hotels": [
+      {
+        "name": "Swat Serena Hotel",
+        "description": "A luxurious hotel offering world-class service and facilities.",
+        "rating": 4.8,
+        "price": "20,000rs per night",
+        "imageName": "swat_serena_hotel"
+      },
+      {
+        "name": "Fishermen's Inn",
+        "description": "A rustic yet charming inn by the riverside.",
+        "rating": 4.3,
+        "price": "9000rs per night",
+        "imageName": "fishermens_inn"
+      },
+      {
+        "name": "White Palace Hotel",
+        "description": "A royal palace-inspired hotel with grand architecture.",
+        "rating": 4.6,
+        "price": "16,000rs per night",
+        "imageName": "white_palace_hotel"
+      }
+    ]
+  },
+  "Murree": {
+    "hotels": [
+      {
+        "name": "PC Bhurban",
+        "description": "A luxurious resort with panoramic views of the hills.",
+        "rating": 4.7,
+        "price": "18,000rs per night",
+        "imageName": "pc_bhurban"
+      },
+      {
+        "name": "Murree Hills Hotel",
+        "description": "A cozy, family-friendly hotel offering a perfect escape.",
+        "rating": 4.3,
+        "price": "11,000rs per night",
+        "imageName": "murree_hills_hotel"
+      },
+      {
+        "name": "Miranjani Resort",
+        "description": "A relaxing resort surrounded by beautiful mountain scenery.",
+        "rating": 4.2,
+        "price": "10,000rs per night",
+        "imageName": "miranjani_resort"
+      }
+    ]
+  },
+  "Skardu": {
+    "hotels": [
+      {
+        "name": "Shangrila Resort Skardu",
+        "description": "A famous resort known for its lake-side location and luxurious amenities.",
+        "rating": 4.7,
+        "price": "20,000rs per night",
+        "imageName": "shangrila_resort_skardu"
+      },
+      {
+        "name": "Skardu Serena Hotel",
+        "description": "An elegant hotel with serene views of Skardu's landscapes.",
+        "rating": 4.5,
+        "price": "15,000rs per night",
+        "imageName": "skardu_serena_hotel"
+      },
+      {
+        "name": "Shigar Fort Residence",
+        "description": "A luxurious, heritage hotel set in an ancient fort.",
+        "rating": 4.6,
+        "price": "20,000rs per night",
+        "imageName": "shigar_fort_residence"
+      }
+    ]
+  },
+  "Fairy Meadows": {
+    "hotels": [
+      {
+        "name": "Fairy Meadows Resort",
+        "description": "A charming resort surrounded by scenic beauty, ideal for trekkers.",
+        "rating": 4.8,
+        "price": "16,000rs per night",
+        "imageName": "fairy_meadows_resort"
+      },
+      {
+        "name": "Nanga Parbat Hotel",
+        "description": "A comfortable hotel with breathtaking views of Nanga Parbat.",
+        "rating": 4.4,
+        "price": "12,000rs per night",
+        "imageName": "nanga_parbat_hotel"
+      },
+      {
+        "name": "Fairy Meadows Cottage",
+        "description": "A cozy and rustic cottage perfect for nature lovers.",
+        "rating": 4.2,
+        "price": "9000rs per night",
+        "imageName": "fairy_meadows_cottage"
+      }
+    ]
+  },
+  "Lahore": {
+    "hotels": [
+      {
+        "name": "Pearl Continental Lahore",
+        "description": "A luxury hotel offering modern amenities in the heart of Lahore.",
+        "rating": 4.6,
+        "price": "18,000rs per night",
+        "imageName": "pc_lahore"
+      },
+      {
+        "name": "Lahore Marriott Hotel",
+        "description": "A well-known hotel offering world-class services and elegant rooms.",
+        "rating": 4.5,
+        "price": "15,000rs per night",
+        "imageName": "marriott_lahore"
+      },
+      {
+        "name": "The Nishat Hotel",
+        "description": "A stylish boutique hotel with premium services and city views.",
+        "rating": 4.4,
+        "price": "13,000rs per night",
+        "imageName": "nishat_hotel"
+      }
+    ]
+  },
+  "Karimabad": {
+    "hotels": [
+      {
+        "name": "Hunza Serena Inn",
+        "description": "A luxurious hotel offering breathtaking views of the Hunza valley.",
+        "rating": 4.5,
+        "price": "12,000rs per night",
+        "imageName": "hunza_serena_inn"
+      },
+      {
+        "name": "Baltit Fort Inn",
+        "description": "A beautiful heritage hotel located near Baltit Fort with stunning views.",
+        "rating": 4.6,
+        "price": "10,000rs per night",
+        "imageName": "baltit_fort_inn"
+      },
+      {
+        "name": "Eagle's Nest Hotel",
+        "description": "An eco-friendly hotel nestled in the mountains, ideal for adventure lovers.",
+        "rating": 4.7,
+        "price": "14,000rs per night",
+        "imageName": "eagles_nest_hotel"
+      }
+    ]
+  },
+  "Ratti Gali Lake": {
+    "hotels": [
+      {
+        "name": "Ratti Gali Lake Campsite",
+        "description": "A scenic campsite offering a unique experience by the lake.",
+        "rating": 4.5,
+        "price": "7000rs per night",
+        "imageName": "ratti_gali_campsite"
+      },
+      {
+        "name": "Ratti Gali View Resort",
+        "description": "A peaceful resort with panoramic views of Ratti Gali Lake.",
+        "rating": 4.4,
+        "price": "10,000rs per night",
+        "imageName": "ratti_gali_resort"
+      },
+      {
+        "name": "Lake View Lodge",
+        "description": "A simple lodge offering a cozy stay near Ratti Gali Lake.",
+        "rating": 4.3,
+        "price": "6000rs per night",
+        "imageName": "lake_view_lodge"
+      }
+    ]
+  },
+  "Ziarat": {
+    "hotels": [
+      {
+        "name": "Ziarat Residency",
+        "description": "A historic residency with serene views of the surrounding mountains.",
+        "rating": 4.6,
+        "price": "9000rs per night",
+        "imageName": "ziarat_residency"
+      },
+      {
+        "name": "Quetta Serena Hotel",
+        "description": "A comfortable hotel offering luxurious accommodations in Quetta.",
+        "rating": 4.5,
+        "price": "12,000rs per night",
+        "imageName": "quetta_serena"
+      },
+      {
+        "name": "Ziarat Rest House",
+        "description": "A tranquil rest house offering a peaceful stay in Ziarat.",
+        "rating": 4.3,
+        "price": "8000rs per night",
+        "imageName": "ziarat_rest_house"
+      }
+    ]
+  },
+  "Islamabad": {
+    "hotels": [
+      {
+        "name": "Pearl Continental Islamabad",
+        "description": "A luxurious hotel offering modern facilities and scenic views of Islamabad.",
+        "rating": 4.7,
+        "price": "30,000rs per night",
+        "imageName": "pc_islamabad"
+      },
+      {
+        "name": "Serena Hotel Islamabad",
+        "description": "An elegant hotel with top-notch amenities and exceptional service.",
+        "rating": 4.6,
+        "price": "25,000rs per night",
+        "imageName": "serena_hotel_islamabad"
+      },
+      {
+        "name": "Islamabad Marriott Hotel",
+        "description": "A renowned hotel with a convenient location and luxurious services.",
+        "rating": 4.5,
+        "price": "13,000rs per night",
+        "imageName": "marriott_islamabad"
+      }
+    ]
+  },
+  "Balakot": {
+    "hotels": [
+      {
+        "name": "Balakot View Resort",
+        "description": "A cozy resort offering stunning views of the surrounding mountains and rivers.",
+        "rating": 4.4,
+        "price": "9000rs per night",
+        "imageName": "balakot_view_resort"
+      },
+      {
+        "name": "Kaghan River Resort",
+        "description": "A beautiful resort by the river, perfect for a peaceful getaway.",
+        "rating": 4.5,
+        "price": "10,000rs per night",
+        "imageName": "kaghan_river_resort"
+      },
+      {
+        "name": "Naran View Hotel",
+        "description": "A budget-friendly hotel offering panoramic views of Naran valley.",
+        "rating": 4.3,
+        "price": "8000rs per night",
+        "imageName": "naran_view_hotel"
+      }
+    ]
+  },
+  "Attabad Lake": {
+    "hotels": [
+      {
+        "name": "Attabad Lake Resort",
+        "description": "A lakeside resort offering breathtaking views of Attabad Lake.",
+        "rating": 4.6,
+        "price": "12,000rs per night",
+        "imageName": "attabad_lake_resort"
+      },
+      {
+        "name": "Lake View Hotel",
+        "description": "A charming hotel with picturesque views of Attabad Lake.",
+        "rating": 4.5,
+        "price": "11,000rs per night",
+        "imageName": "lake_view_hotel"
+      },
+      {
+        "name": "Attabad Lake Lodge",
+        "description": "A peaceful lodge offering a relaxing stay by Attabad Lake.",
+        "rating": 4.4,
+        "price": "10,000rs per night",
+        "imageName": "attabad_lake_lodge"
+      }
+    ]
+  },
+  "Chitral": {
+    "hotels": [
+      {
+        "name": "Chitral Serena Hotel",
+        "description": "A luxurious hotel with serene views of Chitral's natural beauty.",
+        "rating": 4.7,
+        "price": "14,000rs per night",
+        "imageName": "chitral_serena_hotel"
+      },
+      {
+        "name": "Chitral View Hotel",
+        "description": "A comfortable hotel with magnificent views of Chitral valley.",
+        "rating": 4.5,
+        "price": "10,000rs per night",
+        "imageName": "chitral_view_hotel"
+      },
+      {
+        "name": "Kalat Hotel",
+        "description": "A charming hotel offering a cozy and peaceful stay in Chitral.",
+        "rating": 4.3,
+        "price": "9000rs per night",
+        "imageName": "kalat_hotel"
+      }
+    ]
+  },
+  "Khunjerab Pass": {
+    "hotels": [
+      {
+        "name": "Khunjerab Pass Guesthouse",
+        "description": "A simple guesthouse offering basic amenities with breathtaking views of the pass.",
+        "rating": 4.4,
+        "price": "8000rs per night",
+        "imageName": "khunjerab_guesthouse"
+      },
+      {
+        "name": "Pass View Hotel",
+        "description": "A budget-friendly hotel located near Khunjerab Pass with stunning views.",
+        "rating": 4.3,
+        "price": "7500rs per night",
+        "imageName": "pass_view_hotel"
+      },
+      {
+        "name": "Khunjerab Adventure Resort",
+        "description": "A unique resort offering a thrilling experience near the Khunjerab Pass.",
+        "rating": 4.5,
+        "price": "10,000rs per night",
+        "imageName": "khunjerab_adventure_resort"
+      }
+    ]
+  },
+  "Gilgit": {
+    "hotels": [
+      {
+        "name": "Gilgit Serena Hotel",
+        "description": "A premium hotel offering a blend of luxury and traditional hospitality.",
+        "rating": 4.6,
+        "price": "13,000rs per night",
+        "imageName": "gilgit_serena_hotel"
+      },
+      {
+        "name": "Gilgit View Hotel",
+        "description": "A comfortable hotel offering panoramic views of Gilgit valley.",
+        "rating": 4.5,
+        "price": "12,000rs per night",
+        "imageName": "gilgit_view_hotel"
+      },
+      {
+        "name": "Hunza View Hotel",
+        "description": "A serene hotel offering stunning views of the surrounding mountains.",
+        "rating": 4.3,
+        "price": "10,000rs per night",
+        "imageName": "hunza_view_hotel"
+      }
+    ]
+  },
+  "Kotli": {
+    "hotels": [
+      {
+        "name": "Kotli Serena Hotel",
+        "description": "A luxury hotel offering modern amenities and beautiful surroundings.",
+        "rating": 4.6,
+        "price": "12,000rs per night",
+        "imageName": "kotli_serena_hotel"
+      },
+      {
+        "name": "Kotli View Resort",
+        "description": "A peaceful resort with scenic views of Kotli valley.",
+        "rating": 4.5,
+        "price": "11,000rs per night",
+        "imageName": "kotli_view_resort"
+      },
+      {
+        "name": "Kohala View Hotel",
+        "description": "A budget-friendly hotel with excellent views of the valley.",
+        "rating": 4.3,
+        "price": "9000rs per night",
+        "imageName": "kohala_view_hotel"
+      }
+    ]
+  },
+  "Neelum Valley": {
+    "hotels": [
+      {
+        "name": "Neelum View Hotel",
+        "description": "A beautiful hotel with stunning views of Neelum River.",
+        "rating": 4.7,
+        "price": "13,000rs per night",
+        "imageName": "neelum_view_hotel"
+      },
+      {
+        "name": "Kashmir Retreat",
+        "description": "A peaceful retreat offering serene surroundings and comfortable accommodations.",
+        "rating": 4.5,
+        "price": "11,000rs per night",
+        "imageName": "kashmir_retreat"
+      },
+      {
+        "name": "Neelum Valley Resort",
+        "description": "A charming resort nestled in the beautiful Neelum Valley.",
+        "rating": 4.6,
+        "price": "12,000rs per night",
+        "imageName": "neelum_valley_resort"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="20dp"
+    android:background="@color/md_theme_surface"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/dayTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="@color/md_theme_primary"
+        android:text="Day 1" />
+
+    <TextView
+        android:id="@+id/expandIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="▼"
+        android:textSize="24sp"
+        android:textColor="@color/md_theme_primary"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp" />
+
+    <!-- Bottom divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/md_theme_outlineVariant"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="8dp" />
+</LinearLayout> 

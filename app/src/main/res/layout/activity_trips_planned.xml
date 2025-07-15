@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_trips_planned.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Heading -->
+    <TextView
+        android:id="@+id/heading_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trip History"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"
+        android:textColor="#000000" />
+
+    <!-- Trip List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_trips"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

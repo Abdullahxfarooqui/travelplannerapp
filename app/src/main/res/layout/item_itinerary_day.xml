@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/primary"
+    app:strokeWidth="1dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/dayTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day 1"
+            android:textSize="18sp"
+            android:textColor="@color/primary"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/rounded_day_label_bg"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="8dp"
+            app:dividerColor="@color/accentLight" />
+
+        <LinearLayout
+            android:id="@+id/activitiesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Each activity will be added dynamically as below: -->
+            <!--
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/primary"
+                    android:layout_marginEnd="12dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/activityTimeChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="09:00 AM"
+                        style="@style/Widget.Material3.Chip.Assist.Elevated"
+                        app:chipBackgroundColor="@color/accentLight"
+                        app:chipStrokeWidth="0dp"
+                        app:chipIconTint="@color/primary"
+                        android:textColor="@color/primary"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:id="@+id/activityTitleTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Breakfast at hotel"
+                        android:textSize="16sp"
+                        android:textColor="@color/textPrimary"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:id="@+id/activityDescriptionTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enjoy a buffet breakfast at the main restaurant."
+                        android:textSize="14sp"
+                        android:textColor="@color/textBody"
+                        android:fontFamily="sans-serif"
+                        android:layout_marginBottom="2dp"
+                        android:visibility="visible" />
+                </LinearLayout>
+            </LinearLayout>
+            -->
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView> 
