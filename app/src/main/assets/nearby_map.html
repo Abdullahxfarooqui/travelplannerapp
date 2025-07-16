@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Nearby Attractions Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 100%; width: 100vw; min-height: 300px; }
+        .leaflet-bottom.leaflet-right { bottom: 60px !important; }
+        #bottomSheet {
+            position: fixed;
+            left: 0; right: 0; bottom: -300px;
+            background: #fff;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            padding: 20px;
+            z-index: 9999;
+            transition: bottom 0.3s;
+        }
+        #bottomSheet.visible { bottom: 0; }
+        #bottomSheet h2 { margin: 0 0 8px 0; font-size: 20px; }
+        #bottomSheet .close { float: right; font-size: 22px; cursor: pointer; }
+        #bottomSheet p { margin: 4px 0; }
+        #messageOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            font-size: 16px;
+            color: #333;
+            display: none;
+        }
+        #attractionsList {
+            max-height: 180px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0 0 0 0;
+            list-style: none;
+            border-top: 1px solid #eee;
+            background: #fafbfc;
+        }
+        #attractionsList li {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+            line-height: 1.4;
+        }
+        #attractionsList li:hover {
+            background: #e3f2fd;
+        }
+        #attractionsList .attr-title {
+            font-weight: bold;
+            font-size: 15px;
+            color: #1976d2;
+        }
+        #attractionsList .attr-type {
+            font-size: 13px;
+            color: #666;
+            margin-right: 8px;
+        }
+        #attractionsList .attr-distance {
+            font-size: 13px;
+            color: #388e3c;
+            margin-right: 8px;
+        }
+        #attractionsList .attr-address {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<ul id="attractionsList"></ul>
+<div id="messageOverlay"></div>
+<div id="bottomSheet">
+    <span class="close" onclick="hideSheet()">&times;</span>
+    <h2 id="placeName"></h2>
+    <p id="placeType"></p>
+    <p id="placeDistance"></p>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// --- Config ---
+const LOCATIONIQ_TOKEN = 'pk.1ef4faca32216233742e487f2372c924';
+const API_URL = 'https://us1.locationiq.com/v1/nearby';
+
+// --- Helpers ---
+function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // meters
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// --- Android interface ---
+function getTripCoords() {
+    if (window.AndroidBridge && window.AndroidBridge.getTripLatLng) {
+        try {
+            const coords = JSON.parse(window.AndroidBridge.getTripLatLng());
+            return coords;
+        } catch (e) { return {lat: 33.6844, lon: 73.0479}; }
+    }
+    // fallback: Islamabad
+    return {lat: 33.6844, lon: 73.0479};
+}
+
+function showSheet(place, tripLat, tripLon) {
+    document.getElementById('placeName').textContent = place.name || 'Unknown';
+    document.getElementById('placeType').textContent = 'Type: ' + (place.type || place.class || 'Unknown');
+    const dist = haversine(tripLat, tripLon, place.lat, place.lon);
+    document.getElementById('placeDistance').textContent = 'Distance: ' + (dist/1000).toFixed(2) + ' km';
+    document.getElementById('bottomSheet').classList.add('visible');
+}
+function hideSheet() {
+    document.getElementById('bottomSheet').classList.remove('visible');
+}
+function showMessage(msg) {
+    const overlay = document.getElementById('messageOverlay');
+    overlay.textContent = msg;
+    overlay.style.display = 'block';
+}
+function hideMessage() {
+    document.getElementById('messageOverlay').style.display = 'none';
+}
+
+// --- Main ---
+let markers = [];
+let places = [];
+let map;
+(async function() {
+    const {lat, lon} = getTripCoords();
+    map = L.map('map', {
+        zoomControl: true,
+        dragging: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true,
+        tap: true,
+        touchZoom: true,
+        attributionControl: true
+    }).setView([lat, lon], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([lat, lon], {icon: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',iconSize:[32,32]})}).addTo(map).bindPopup('Trip Location').openPopup();
+
+    // --- Caching ---
+    const cacheKey = `nearby_${lat}_${lon}`;
+    places = [];
+    let fromCache = false;
+    if (localStorage.getItem(cacheKey)) {
+        try {
+            places = JSON.parse(localStorage.getItem(cacheKey));
+            fromCache = true;
+        } catch (e) { places = []; }
+    }
+    if (!places.length) {
+        try {
+            const url = `${API_URL}?key=${LOCATIONIQ_TOKEN}&lat=${lat}&lon=${lon}&tag=tourism:*&radius=3000&format=json`;
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('API error');
+            places = await resp.json();
+            localStorage.setItem(cacheKey, JSON.stringify(places));
+        } catch (e) {
+            showMessage('Failed to load nearby attractions. Please check your connection or try again later.');
+            return;
+        }
+    }
+    if (!places.length) {
+        showMessage('No nearby attractions found for this location.');
+        return;
+    }
+    hideMessage();
+    // --- Markers and List ---
+    let anyMarkers = false;
+    markers = [];
+    const list = document.getElementById('attractionsList');
+    list.innerHTML = '';
+    places.forEach((place, idx) => {
+        if (!place.lat || !place.lon) return;
+        const marker = L.marker([place.lat, place.lon]).addTo(map);
+        marker.on('click', () => showSheet(place, lat, lon));
+        markers.push(marker);
+        anyMarkers = true;
+        // Calculate distance
+        const dist = haversine(lat, lon, place.lat, place.lon);
+        // Format address
+        let address = '';
+        if (place.address) {
+            address = place.address.name || '';
+            if (place.address.road) address += ', ' + place.address.road;
+            if (place.address.city) address += ', ' + place.address.city;
+            if (place.address.state) address += ', ' + place.address.state;
+            if (place.address.country) address += ', ' + place.address.country;
+        } else if (place.display_name) {
+            address = place.display_name;
+        }
+        // Add to list
+        const li = document.createElement('li');
+        li.innerHTML = `<span class='attr-title'>${place.name || place.display_name || 'Unknown'}</span><br>
+            <span class='attr-type'>${place.type || place.class || ''}</span>
+            <span class='attr-distance'>${(dist/1000).toFixed(2)} km</span><br>
+            <span class='attr-address'>${address}</span>`;
+        li.onclick = () => {
+            map.setView([place.lat, place.lon], 16, {animate:true});
+            marker.openPopup();
+            showSheet(place, lat, lon);
+        };
+        list.appendChild(li);
+    });
+    if (!anyMarkers) {
+        showMessage('No nearby attractions found for this location.');
+    }
+    // --- Send to Android ---
+    if (window.AndroidBridge && window.AndroidBridge.setNearbyAttractions) {
+        // Prepare a simplified array for Android
+        const tripLat = lat, tripLon = lon;
+        const androidPlaces = places.map((place, idx) => {
+            const dist = (place.lat && place.lon) ? haversine(tripLat, tripLon, place.lat, place.lon) : 0;
+            let address = '';
+            if (place.address) {
+                address = place.address.name || '';
+                if (place.address.road) address += ', ' + place.address.road;
+                if (place.address.city) address += ', ' + place.address.city;
+                if (place.address.state) address += ', ' + place.address.state;
+                if (place.address.country) address += ', ' + place.address.country;
+            } else if (place.display_name) {
+                address = place.display_name;
+            }
+            return {
+                name: place.name || place.display_name || 'Unknown',
+                description: '',
+                imageUrl: '',
+                type: place.type || place.class || '',
+                distance: dist,
+                address: address,
+                latitude: place.lat || null,
+                longitude: place.lon || null
+            };
+        });
+        window.AndroidBridge.setNearbyAttractions(JSON.stringify(androidPlaces));
+    }
+})();
+
+// Allow Android to highlight a marker by index
+function mapHighlightMarker(idx) {
+    if (!markers[idx]) return;
+    map.setView(markers[idx].getLatLng(), 16, {animate:true});
+    markers[idx].openPopup();
+    // Optionally show the sheet
+    if (places[idx]) showSheet(places[idx], getTripCoords().lat, getTripCoords().lon);
+}
+</script>
+</body>
+</html> 

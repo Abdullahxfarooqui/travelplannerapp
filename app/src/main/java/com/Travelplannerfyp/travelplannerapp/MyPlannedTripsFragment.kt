@@ -290,7 +290,9 @@ class MyPlannedTripsFragment : Fragment() {
             putExtra("placeImageUrl", trip.placeImageUrl)
             putExtra("tripId", trip.id)
             putExtra("price", trip.price)
-            // No need to pass hotel as parcelable since TripDetailActivity will load it directly from Firebase
+            // Pass coordinates
+            putExtra("latitude", trip.latitude ?: 33.6844)
+            putExtra("longitude", trip.longitude ?: 73.0479)
         }
         startActivity(intent)
     }

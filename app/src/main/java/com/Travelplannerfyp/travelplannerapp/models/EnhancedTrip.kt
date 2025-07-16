@@ -25,7 +25,9 @@ data class EnhancedTrip(
     val price: String = "", // Trip price in PKR
     val hotel: Hotel? = null, // Hotel information
     val itinerary: Map<String, List<String>> = emptyMap(), // Day-wise itinerary
-    val reservation: Boolean = false // Hotel reservation status
+    val reservation: Boolean = false, // Hotel reservation status
+    val latitude: Double? = null,
+    val longitude: Double? = null
 ) : Parcelable
 
 enum class TripVisibility {

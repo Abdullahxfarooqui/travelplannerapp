@@ -199,6 +199,17 @@
                             tools:text="Rs. 25,000" />
                     </LinearLayout>
 
+                    <!-- Estimate Budget Button (moved here) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/budgetEstimatorButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Estimate Budget"
+                        android:icon="@drawable/ic_plan"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp" />
+
                     <!-- Divider -->
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
@@ -316,6 +327,84 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Nearby Attractions Map Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/nearbyMapCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                style="@style/Widget.Material3.CardView.Elevated">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nearby Attractions"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary" />
+                    <WebView
+                        android:id="@+id/nearbyMapWebView"
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_marginTop="12dp"
+                        android:background="#EEEEEE"
+                        android:visibility="visible" />
+
+                    <!-- Nearby Attractions List -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginHorizontal="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp"
+                        style="@style/Widget.Material3.CardView.Elevated">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView
+                                android:id="@+id/nearbyAttractionsHeader"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Nearby Places"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/primary"
+                                android:layout_marginBottom="8dp" />
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider" />
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/nearbyAttractionsRecyclerView"
+                                android:layout_width="match_parent"
+                                android:layout_height="320dp"
+                                android:layout_marginTop="8dp"
+                                android:scrollbars="vertical" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/getDirectionsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginBottom="16dp"
+                android:text="Get Directions"
+                android:icon="@drawable/ic_location"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
             <!-- Itinerary Section Title -->
             <TextView
                 android:id="@+id/itinerarySectionTitle"
@@ -427,51 +516,6 @@
             <!-- Itinerary Section removed as per requirements -->
 
             <!-- Reservations Section Removed as per requirements -->
-
-            <!-- Map Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                style="@style/Widget.Material3.CardView.Elevated">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Map"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary" />
-
-                    <ImageView
-                        android:id="@+id/mapImageView"
-                        android:layout_width="match_parent"
-                        android:layout_height="160dp"
-                        android:layout_marginTop="12dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_placeholder"
-                        tools:src="@drawable/ic_map" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/directionsButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Get Directions"
-                        android:icon="@drawable/ic_location"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="12dp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- Notes Section -->
             <com.google.android.material.card.MaterialCardView

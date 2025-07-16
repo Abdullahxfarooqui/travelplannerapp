@@ -339,6 +339,9 @@ class ExploreTripsFragment : Fragment() {
             putExtra("seatsAvailable", trip.seatsAvailable.toString())
             putExtra("placeImageUrl", trip.placeImageUrl)
             putExtra("tripId", trip.id)
+            // Pass coordinates
+            putExtra("latitude", trip.latitude ?: 33.6844)
+            putExtra("longitude", trip.longitude ?: 73.0479)
         }
         startActivity(intent)
     }

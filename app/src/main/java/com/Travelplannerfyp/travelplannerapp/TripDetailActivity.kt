@@ -33,9 +33,34 @@ import android.view.View
 import com.Travelplannerfyp.travelplannerapp.utils.HotelImageLoader
 import com.Travelplannerfyp.travelplannerapp.adapters.ItineraryAdapter
 import com.Travelplannerfyp.travelplannerapp.models.ItineraryItem
+import android.app.AlertDialog
+import android.view.LayoutInflater
+import android.widget.ArrayAdapter
+import com.google.android.material.textfield.TextInputEditText
+import android.widget.Spinner
+import org.json.JSONObject
+import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.JavascriptInterface
+import com.Travelplannerfyp.travelplannerapp.adapters.NearbyAttractionAdapter
+import com.Travelplannerfyp.travelplannerapp.models.Place
 
 class TripDetailActivity : AppCompatActivity() {
     private var loadedTripImageUrl: String? = null
+    private val currencyApiKey = "a433ae5ec51a375c02cb1ccb"
+    private val currencyApiUrl = "https://v6.exchangerate-api.com/v6/$currencyApiKey/latest/PKR"
+    private var latestRates: Map<String, Double>? = null
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    private var tripLatitude: Double? = null
+    private var tripLongitude: Double? = null
+    private var mapWebView: WebView? = null
+    private var mapLat: Double = 33.6844
+    private var mapLon: Double = 73.0479
+    private lateinit var nearbyAttractionAdapter: NearbyAttractionAdapter
+    private var nearbyAttractions: List<Place> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trip_detail)
@@ -54,6 +79,10 @@ class TripDetailActivity : AppCompatActivity() {
         val hotelList = intent.getParcelableArrayListExtra<Hotel>("hotels") ?: arrayListOf()
         val tripId = intent.getStringExtra("tripId") ?: ""
         val organizerId = intent.getStringExtra("organizerId") ?: ""
+
+        // Get trip lat/lon from intent or fallback
+        tripLatitude = intent.getDoubleExtra("latitude", 33.6844)
+        tripLongitude = intent.getDoubleExtra("longitude", 73.0479)
 
         // Initialize views
         val placeNameTextView = findViewById<TextView>(R.id.placeNameTextView)
@@ -424,54 +453,6 @@ class TripDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Setup directions button in map section
-        val directionsButton = findViewById<MaterialButton>(R.id.directionsButton)
-        directionsButton.setOnClickListener {
-            try {
-                // Use the same logic as the main directions button
-                val locationIqToken = "pk.1ef4faca32216233742e487f2372c924"
-                val encodedLocation = java.net.URLEncoder.encode(placeName, "UTF-8")
-                val geocodeUrl = "https://us1.locationiq.com/v1/search.php?key=$locationIqToken&q=$encodedLocation&format=json"
-
-                val client = OkHttpClient()
-                val request = Request.Builder().url(geocodeUrl).build()
-
-                client.newCall(request).enqueue(object : okhttp3.Callback {
-                    override fun onFailure(call: okhttp3.Call, e: IOException) {
-                        runOnUiThread {
-                            openDirectionsWithPlaceName(placeName)
-                        }
-                    }
-
-                    override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                        if (response.isSuccessful) {
-                            val body = response.body?.string()
-                            try {
-                                val jsonArray = JSONArray(body)
-                                if (jsonArray.length() > 0) {
-                                    val obj = jsonArray.getJSONObject(0)
-                                    val lat = obj.getString("lat")
-                                    val lon = obj.getString("lon")
-                                    runOnUiThread {
-                                        openDirectionsWithCoordinates(lat, lon, placeName)
-                                    }
-                                    return
-                                }
-                            } catch (e: Exception) {
-                                // Fallback to place name
-                            }
-                        }
-                        runOnUiThread {
-                            openDirectionsWithPlaceName(placeName)
-                        }
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e("TripDetailActivity", "Error opening directions", e)
-                openDirectionsWithPlaceName(placeName)
-            }
-        }
-
         // Setup booking button
         setupBookingButton(placeName, organizerName, organizerPhone, startDate, endDate, seatsAvailable)
 
@@ -480,71 +461,68 @@ class TripDetailActivity : AppCompatActivity() {
         supportActionBar?.title = placeName
 
         // --- Map Section with LocationIQ ---
-        val mapImageView = findViewById<ImageView>(R.id.mapImageView)
-        val location = placeName // or use a more precise address if available
-        val locationIqToken = "pk.1ef4faca32216233742e487f2372c924"
-        val encodedLocation = java.net.URLEncoder.encode(location, "UTF-8")
+        // Remove all code that references directionsButton and mapImageView, including findViewById, click listeners, and related logic.
 
-        // Apply professional styling to map
-        mapImageView.apply {
-            clipToOutline = true
-            outlineProvider = object : android.view.ViewOutlineProvider() {
-                override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, 24f)
+        // Setup Nearby Attractions Map WebView
+        mapWebView = findViewById(R.id.nearbyMapWebView)
+        // Geocode place name for accurate map location
+        geocodePlaceAndLoadMap(placeName)
+
+        // Setup Get Directions button below the map
+        val getDirectionsButton = findViewById<MaterialButton>(R.id.getDirectionsButton)
+        getDirectionsButton.setOnClickListener {
+            val lat = mapLat
+            val lon = mapLon
+            val gmmIntentUri = android.net.Uri.parse("google.navigation:q=$lat,$lon")
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+            if (mapIntent.resolveActivity(packageManager) != null) {
+                startActivity(mapIntent)
+            } else {
+                // Fallback to generic maps app
+                val fallbackUri = android.net.Uri.parse("geo:$lat,$lon?q=$lat,$lon")
+                val fallbackIntent = Intent(Intent.ACTION_VIEW, fallbackUri)
+                if (fallbackIntent.resolveActivity(packageManager) != null) {
+                    startActivity(fallbackIntent)
+                } else {
+                    Toast.makeText(this, "No maps app available", Toast.LENGTH_SHORT).show()
                 }
             }
-            background = resources.getDrawable(R.drawable.map_rounded_background, null)
         }
 
-        fun loadStaticMap(lat: String?, lon: String?) {
-            val center = if (lat != null && lon != null) "$lat,$lon" else encodedLocation
-            val marker = if (lat != null && lon != null) "$lat,$lon" else encodedLocation
-            val mapUrl = "https://maps.locationiq.com/v3/staticmap?key=$locationIqToken&center=$center&zoom=13&size=800x400&markers=icon:large-red-cutout|$marker&format=png"
-
-            Picasso.get()
-                .load(mapUrl)
-                .placeholder(R.drawable.ic_placeholder)
-                .error(R.drawable.ic_placeholder)
-                .into(mapImageView, object : Callback {
-                    override fun onSuccess() {
-                        Log.d("TripDetailActivity", "Map loaded successfully")
-                    }
-
-                    override fun onError(e: Exception?) {
-                        Log.e("TripDetailActivity", "Map load failed: ${e?.message}", e)
-                        mapImageView.setImageResource(R.drawable.ic_placeholder)
-                    }
-                })
-        }
-
-        // Try to geocode the place name to get lat/lon
-        val client = OkHttpClient()
-        val geocodeUrl = "https://us1.locationiq.com/v1/search.php?key=$locationIqToken&q=$encodedLocation&format=json"
-        val request = Request.Builder().url(geocodeUrl).build()
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                // Fallback to place name if geocoding fails
-                runOnUiThread { loadStaticMap(null, null) }
-            }
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                if (response.isSuccessful) {
-                    val body = response.body?.string()
-                    try {
-                        val jsonArray = JSONArray(body)
-                        if (jsonArray.length() > 0) {
-                            val obj = jsonArray.getJSONObject(0)
-                            val lat = obj.getString("lat")
-                            val lon = obj.getString("lon")
-                            runOnUiThread { loadStaticMap(lat, lon) }
-                            return
+        // Setup Nearby Attractions RecyclerView
+        val nearbyRecyclerView = findViewById<RecyclerView>(R.id.nearbyAttractionsRecyclerView)
+        nearbyAttractionAdapter = NearbyAttractionAdapter(emptyList(),
+            onItemClick = { place, idx ->
+                // Only highlight marker on map
+                mapWebView?.evaluateJavascript("mapHighlightMarker($idx);", null)
+            },
+            onDirectionsClick = { place, idx ->
+                // Open directions to the attraction
+                if (place.latitude != null && place.longitude != null && place.latitude != 0.0 && place.longitude != 0.0) {
+                    val gmmIntentUri = android.net.Uri.parse("google.navigation:q=${place.latitude},${place.longitude}(${place.name})")
+                    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                    mapIntent.setPackage("com.google.android.apps.maps")
+                    if (mapIntent.resolveActivity(packageManager) != null) {
+                        startActivity(mapIntent)
+                    } else {
+                        // Fallback to generic maps app
+                        val fallbackUri = android.net.Uri.parse("geo:${place.latitude},${place.longitude}?q=${place.latitude},${place.longitude}(${place.name})")
+                        val fallbackIntent = Intent(Intent.ACTION_VIEW, fallbackUri)
+                        if (fallbackIntent.resolveActivity(packageManager) != null) {
+                            startActivity(fallbackIntent)
+                        } else {
+                            Toast.makeText(this, "No maps app available", Toast.LENGTH_SHORT).show()
                         }
-                    } catch (e: Exception) {
-                        // Ignore and fallback
                     }
+                } else {
+                    Toast.makeText(this, "Location not available for this place", Toast.LENGTH_SHORT).show()
                 }
-                runOnUiThread { loadStaticMap(null, null) }
             }
-        })
+        )
+        nearbyRecyclerView.layoutManager = LinearLayoutManager(this)
+        nearbyRecyclerView.adapter = nearbyAttractionAdapter
+        nearbyRecyclerView.isNestedScrollingEnabled = true
 
         // Remove booking summary card references (no longer in layout)
         // val bookingSummaryCard = findViewById<androidx.cardview.widget.CardView>(R.id.bookingSummaryCard)
@@ -593,6 +571,13 @@ class TripDetailActivity : AppCompatActivity() {
         //         bookingSummaryCard.visibility = View.GONE
         //     }
         // })
+
+        // Budget Estimator Button
+        val budgetEstimatorButton = findViewById<MaterialButton>(R.id.budgetEstimatorButton)
+        budgetEstimatorButton.setOnClickListener {
+            showBudgetEstimatorDialog()
+        }
+        fetchCurrencyRates()
     }
 
     private fun loadTripPrice(tripId: String, tripPriceTextView: TextView?) {
@@ -1035,5 +1020,217 @@ class TripDetailActivity : AppCompatActivity() {
             Log.e("TripDetailActivity", "Error opening directions with place name", e)
             Toast.makeText(this, "Unable to open directions", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showBudgetEstimatorDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_budget_estimator, null)
+        val travelersInput = dialogView.findViewById<TextInputEditText>(R.id.inputTravelers)
+        val daysInput = dialogView.findViewById<TextInputEditText>(R.id.inputDays)
+        val chipGroupTripType = dialogView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.chipGroupTripType)
+        val chipBudget = dialogView.findViewById<com.google.android.material.chip.Chip>(R.id.chipBudget)
+        val chipModerate = dialogView.findViewById<com.google.android.material.chip.Chip>(R.id.chipModerate)
+        val chipLuxury = dialogView.findViewById<com.google.android.material.chip.Chip>(R.id.chipLuxury)
+        val tripTypeDescription = dialogView.findViewById<TextView>(R.id.tripTypeDescription)
+        val currencySpinner = dialogView.findViewById<Spinner>(R.id.spinnerCurrency)
+        val resultText = dialogView.findViewById<TextView>(R.id.estimatedBudgetResult)
+        val btnEstimate = dialogView.findViewById<MaterialButton>(R.id.btnEstimate)
+        val btnClose = dialogView.findViewById<MaterialButton>(R.id.btnClose)
+        val breakdownCard = dialogView.findViewById<androidx.cardview.widget.CardView>(R.id.budgetBreakdownCard)
+        val breakdownDetails = dialogView.findViewById<TextView>(R.id.breakdownDetails)
+
+        // Trip type info
+        val tripTypeInfo = mapOf(
+            chipBudget.id to "Budget: Basic hotels, public transport, local meals.",
+            chipModerate.id to "Moderate: 3-star hotels, some private transport, mix of local and restaurant meals.",
+            chipLuxury.id to "Luxury: 4-5 star hotels, private transport, fine dining, premium experiences."
+        )
+        chipGroupTripType.setOnCheckedChangeListener { group, checkedId ->
+            tripTypeDescription.text = tripTypeInfo[checkedId] ?: "Select a trip type to see details."
+        }
+        chipBudget.isChecked = true
+        tripTypeDescription.text = tripTypeInfo[chipBudget.id]
+
+        // Currency options
+        val currencies = listOf("PKR", "USD", "EUR")
+        currencySpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, currencies)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        btnEstimate.setOnClickListener {
+            val travelers = travelersInput.text.toString().toIntOrNull() ?: 1
+            val days = daysInput.text.toString().toIntOrNull() ?: 1
+            val tripType = when (chipGroupTripType.checkedChipId) {
+                chipBudget.id -> "Budget"
+                chipModerate.id -> "Moderate"
+                chipLuxury.id -> "Luxury"
+                else -> "Budget"
+            }
+            val currency = currencySpinner.selectedItem.toString()
+            val hotelPrice = getSelectedHotelPrice()
+            val (meals, transport, experience) = getAddOns(tripType, days, travelers)
+            val totalPKR = (hotelPrice * days * travelers) + meals + transport + experience
+            // Show breakdown
+            val breakdown = "Hotel: ${CurrencyUtils.formatAsPKR(hotelPrice * days * travelers)}\n" +
+                    "Meals: ${CurrencyUtils.formatAsPKR(meals)}\n" +
+                    "Transport: ${CurrencyUtils.formatAsPKR(transport)}\n" +
+                    "Experiences: ${CurrencyUtils.formatAsPKR(experience)}"
+            breakdownDetails.text = breakdown
+            breakdownCard.visibility = View.VISIBLE
+            convertAndDisplayBudget(totalPKR, travelers, days, currency, resultText)
+        }
+        dialog.show()
+    }
+
+    private fun getBaseTripPrice(): Double {
+        // Try to get from loaded trip price, fallback to 5000
+        val tripPriceTextView = findViewById<TextView?>(R.id.tripPriceTextView)
+        val priceText = tripPriceTextView?.text?.toString()?.replace("Rs.", "")?.replace(",", "")?.trim() ?: "5000"
+        return priceText.toDoubleOrNull() ?: 5000.0
+    }
+
+    private fun getSelectedHotelPrice(): Double {
+        // Try to get from hotel price text view, fallback to 5000
+        val hotelPriceTextView = findViewById<TextView?>(R.id.hotelPriceTextView)
+        val priceText = hotelPriceTextView?.text?.toString()
+        // Expecting format: "Price per night: Rs. 5,000" or "Price per night: Not set"
+        val regex = Regex("[\\d,]+(?:\\.\\d+)?")
+        val match = priceText?.let { regex.find(it.replace(",", "")) }
+        val price = match?.value?.replace(",", "")?.toDoubleOrNull()
+        return price ?: 5000.0
+    }
+
+    private fun getAddOns(tripType: String, days: Int, travelers: Int): Triple<Double, Double, Double> {
+        // Example values, adjust as needed
+        val mealPerDay = when (tripType) {
+            "Budget" -> 600.0
+            "Moderate" -> 1200.0
+            "Luxury" -> 2500.0
+            else -> 1000.0
+        }
+        val transportPerDay = when (tripType) {
+            "Budget" -> 800.0
+            "Moderate" -> 2000.0
+            "Luxury" -> 4000.0
+            else -> 1500.0
+        }
+        val experiencePerTrip = when (tripType) {
+            "Budget" -> 1000.0
+            "Moderate" -> 3000.0
+            "Luxury" -> 8000.0
+            else -> 2000.0
+        }
+        val meals = mealPerDay * days * travelers
+        val transport = transportPerDay * days
+        val experience = experiencePerTrip * travelers
+        return Triple(meals, transport, experience)
+    }
+
+    private fun fetchCurrencyRates() {
+        executor.execute {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder().url(currencyApiUrl).build()
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                if (body != null) {
+                    val json = JSONObject(body)
+                    val rates = json.getJSONObject("conversion_rates")
+                    latestRates = mapOf(
+                        "PKR" to 1.0,
+                        "USD" to rates.optDouble("USD", 0.0),
+                        "EUR" to rates.optDouble("EUR", 0.0)
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("BudgetEstimator", "Failed to fetch currency rates: ${e.message}")
+            }
+        }
+    }
+
+    private fun convertAndDisplayBudget(totalPKR: Double, travelers: Int, days: Int, currency: String, resultText: TextView) {
+        val rates = latestRates ?: mapOf("PKR" to 1.0, "USD" to 0.0036, "EUR" to 0.0033)
+        val rate = rates[currency] ?: 1.0
+        val converted = totalPKR * rate
+        val formatted = CurrencyUtils.format(converted, currency)
+        runOnUiThread {
+            resultText.text = "Estimated Cost: $formatted (for $travelers travelers, $days days)"
+        }
+    }
+
+    private fun geocodePlaceAndLoadMap(placeName: String) {
+        val locationIqToken = "pk.1ef4faca32216233742e487f2372c924"
+        val encodedLocation = java.net.URLEncoder.encode(placeName, "UTF-8")
+        val geocodeUrl = "https://us1.locationiq.com/v1/search.php?key=$locationIqToken&q=$encodedLocation&format=json"
+        val client = OkHttpClient()
+        val request = Request.Builder().url(geocodeUrl).build()
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                runOnUiThread { loadMapWebView(mapLat, mapLon) }
+            }
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                if (response.isSuccessful) {
+                    val body = response.body?.string()
+                    try {
+                        val jsonArray = JSONArray(body)
+                        if (jsonArray.length() > 0) {
+                            val obj = jsonArray.getJSONObject(0)
+                            mapLat = obj.getString("lat").toDoubleOrNull() ?: mapLat
+                            mapLon = obj.getString("lon").toDoubleOrNull() ?: mapLon
+                        }
+                    } catch (_: Exception) {}
+                }
+                runOnUiThread { loadMapWebView(mapLat, mapLon) }
+            }
+        })
+    }
+
+    private fun loadMapWebView(lat: Double, lon: Double) {
+        mapWebView?.settings?.javaScriptEnabled = true
+        mapWebView?.settings?.domStorageEnabled = true
+        mapWebView?.settings?.setSupportZoom(true)
+        mapWebView?.settings?.builtInZoomControls = true
+        mapWebView?.settings?.displayZoomControls = false
+        mapWebView?.settings?.useWideViewPort = true
+        mapWebView?.settings?.loadWithOverviewMode = true
+        mapWebView?.webViewClient = WebViewClient()
+        mapWebView?.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun getTripLatLng(): String {
+                return "{" + "\"lat\":" + lat + ",\"lon\":" + lon + "}"
+            }
+            @JavascriptInterface
+            fun setNearbyAttractions(json: String) {
+                try {
+                    val arr = JSONArray(json)
+                    val list = mutableListOf<Place>()
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        list.add(
+                            Place(
+                                name = obj.optString("name"),
+                                description = obj.optString("description"),
+                                imageUrl = obj.optString("imageUrl"),
+                                type = obj.optString("type"),
+                                distance = obj.optDouble("distance", 0.0),
+                                address = obj.optString("address"),
+                                latitude = obj.optDouble("latitude", Double.NaN).takeIf { !it.isNaN() },
+                                longitude = obj.optDouble("longitude", Double.NaN).takeIf { !it.isNaN() }
+                            )
+                        )
+                    }
+                    runOnUiThread {
+                        nearbyAttractions = list
+                        nearbyAttractionAdapter.updateData(list)
+                    }
+                } catch (e: Exception) {
+                    Log.e("TripDetailActivity", "Failed to parse nearby attractions: ${e.message}")
+                }
+            }
+        }, "AndroidBridge")
+        mapWebView?.loadUrl("file:///android_asset/nearby_map.html")
     }
 }

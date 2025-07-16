@@ -343,6 +343,9 @@ class MyTripsFragment : Fragment() {
             }
             // Pass itinerary as a serializable map
             putExtra("itineraryMap", HashMap(trip.itinerary))
+            // Pass coordinates
+            putExtra("latitude", trip.latitude ?: 33.6844)
+            putExtra("longitude", trip.longitude ?: 73.0479)
         }
         startActivity(intent)
     }

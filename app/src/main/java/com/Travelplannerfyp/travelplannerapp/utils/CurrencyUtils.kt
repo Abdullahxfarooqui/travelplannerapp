@@ -38,4 +38,35 @@ object CurrencyUtils {
             "$prefix $amount"
         }
     }
+
+    /**
+     * Format a double amount as USD currency
+     */
+    fun formatAsUSD(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale.US)
+        return formatter.format(amount)
+    }
+
+    /**
+     * Format a double amount as EUR currency
+     */
+    fun formatAsEUR(amount: Double): String {
+        val formatter = NumberFormat.getCurrencyInstance(Locale.GERMANY)
+        return formatter.format(amount)
+    }
+
+    /**
+     * Format a double amount as a given currency code (e.g., PKR, USD, EUR)
+     */
+    fun format(amount: Double, currencyCode: String): String {
+        val locale = when (currencyCode) {
+            "PKR" -> Locale("en", "PK")
+            "USD" -> Locale.US
+            "EUR" -> Locale.GERMANY
+            else -> Locale.getDefault()
+        }
+        val formatter = NumberFormat.getCurrencyInstance(locale)
+        formatter.currency = java.util.Currency.getInstance(currencyCode)
+        return formatter.format(amount)
+    }
 }

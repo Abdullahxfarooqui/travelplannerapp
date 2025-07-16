@@ -23,7 +23,9 @@ data class Trip(
     var difficulty: String? = null,
     var weather: String? = null,
     var recommendedSeason: String? = null,
-    var hotels: List<String>? = null
+    var hotels: List<String>? = null,
+    var latitude: Double? = null,
+    var longitude: Double? = null
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -46,7 +48,9 @@ data class Trip(
         difficulty = parcel.readString(),
         weather = parcel.readString(),
         recommendedSeason = parcel.readString(),
-        hotels = parcel.createStringArrayList()
+        hotels = parcel.createStringArrayList(),
+        latitude = parcel.readDouble(),
+        longitude = parcel.readDouble()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -70,6 +74,8 @@ data class Trip(
         parcel.writeString(weather)
         parcel.writeString(recommendedSeason)
         parcel.writeStringList(hotels)
+        parcel.writeDouble(latitude ?: 0.0)
+        parcel.writeDouble(longitude ?: 0.0)
     }
 
     override fun describeContents(): Int = 0
