@@ -28,6 +28,7 @@ import com.google.firebase.database.*
 import android.text.TextWatcher
 import com.google.android.gms.tasks.Task
 import com.Travelplannerfyp.travelplannerapp.R
+import android.widget.Toast
 
 class LoginActivity : AppCompatActivity() {
     // UI components
