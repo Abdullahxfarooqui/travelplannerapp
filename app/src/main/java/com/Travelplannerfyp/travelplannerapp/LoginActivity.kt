@@ -64,6 +64,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("ADMIN_BTN", "onCreate started")
+        Log.e("ADMIN_BTN", "TEST: This should definitely show up in logs")
+        Toast.makeText(this, "LoginActivity onCreate started", Toast.LENGTH_SHORT).show()
         setContentView(R.layout.activity_login)
         Log.d("ADMIN_BTN", "setContentView completed")
         

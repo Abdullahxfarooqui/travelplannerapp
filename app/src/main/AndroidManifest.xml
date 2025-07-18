@@ -25,7 +25,7 @@
 
         <!-- Launcher Activity -->
         <activity
-            android:name="com.Travelplannerfyp.travelplannerapp.SplashActivity"
+            android:name="com.Travelplannerfyp.travelplannerapp.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.Travelplannerapp.NoActionBar">
             <intent-filter>
@@ -33,6 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Splash Activity (no longer launcher) -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.SplashActivity" android:exported="false" />
 
         <!-- Onboarding Screens -->
         <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding1" android:exported="false" />
