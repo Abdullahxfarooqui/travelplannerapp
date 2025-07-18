@@ -110,6 +110,19 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 Log.e("ADMIN_BTN", "No buttons found at all!")
             }
+            
+            // Log all view IDs in the layout
+            val containerLayout = findViewById<View>(R.id.containerLayout)
+            if (containerLayout != null) {
+                Log.d("ADMIN_BTN", "Container layout found")
+                // Log all child views
+                for (i in 0 until (containerLayout as android.view.ViewGroup).childCount) {
+                    val child = (containerLayout as android.view.ViewGroup).getChildAt(i)
+                    Log.d("ADMIN_BTN", "Child $i: ${child.javaClass.simpleName}, ID: ${resources.getResourceEntryName(child.id)}")
+                }
+            } else {
+                Log.e("ADMIN_BTN", "Container layout NOT found!")
+            }
         }
         
         // Apply animations
