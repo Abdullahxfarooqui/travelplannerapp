@@ -82,92 +82,47 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        rootView = findViewById(android.R.id.content)
-        containerLayout = findViewById(R.id.containerLayout)
-        emailInputLayout = findViewById(R.id.emailInputLayout)
-        emailInput = findViewById(R.id.emailInput)
-        passwordInputLayout = findViewById(R.id.passwordInputLayout)
-        passwordInput = findViewById(R.id.passwordInput)
-        rememberMeCheckbox = findViewById(R.id.rememberMeCheckbox)
-        loginButton = findViewById(R.id.loginButton)
-        registerLink = findViewById(R.id.registerLink)
-        forgotPasswordLink = findViewById(R.id.forgotPasswordLink)
-        googleSignInButton = findViewById(R.id.googleSignInButton)
-        progressBar = findViewById(R.id.progressBar)
-
-        // Set up text input layouts
-        emailInputLayout.errorIconDrawable = null
-        passwordInputLayout.errorIconDrawable = null
-
-        // Add text watchers for real-time validation
-        emailInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                emailInputLayout.error = null
+        // TEMP: Only find the admin button for testing
+        val loginAsAdminButton = findViewById<Button>(R.id.loginAsAdminButton)
+        if (loginAsAdminButton != null) {
+            Log.d("ADMIN_BTN", "Button found: ${loginAsAdminButton.text}")
+            Toast.makeText(this, "Admin button found", Toast.LENGTH_SHORT).show()
+            loginAsAdminButton.setOnClickListener {
+                Log.d("ADMIN_BTN", "Login as Admin button clicked")
+                Toast.makeText(this, "Opening Admin Panel...", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, AdminPanelActivity::class.java)
+                Log.d("ADMIN_BTN", "Intent created: ${intent.component}")
+                startActivity(intent)
+                Log.d("ADMIN_BTN", "startActivity called")
             }
-        })
-
-        passwordInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                passwordInputLayout.error = null
-            }
-        })
+        } else {
+            Log.e("ADMIN_BTN", "Button NOT found!")
+            Toast.makeText(this, "Admin button NOT found!", Toast.LENGTH_LONG).show()
+        }
         
         // Apply animations
+        val rootView = findViewById<View>(android.R.id.content)
         val fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
         fadeIn.duration = 1000
         rootView.startAnimation(fadeIn)
     }
 
     private fun configureGoogleSignIn() {
+        // TEMP: Skip Google Sign-In setup for minimal layout testing
         try {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail() // Remove requestIdToken until OAuth client is configured in Firebase
-                .build()
-
-            googleSignInClient = GoogleSignIn.getClient(this, gso)
-            googleSignInButton.visibility = View.VISIBLE
-            googleSignInButton.setSize(SignInButton.SIZE_STANDARD)
-            googleSignInButton.setColorScheme(SignInButton.COLOR_AUTO)
+            Log.d("ADMIN_BTN", "Skipping Google Sign-In setup for minimal layout testing")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize Google Sign-In", e)
-            googleSignInButton.visibility = View.GONE
-            showSnackbar("Google Sign-In is currently unavailable")
+            Log.e(TAG, "Error in configureGoogleSignIn: ${e.message}")
         }
     }
 
     private fun setupClickListeners() {
-        loginButton.setOnClickListener {
-            // Clear any previous errors
-            emailInputLayout.error = null
-            passwordInputLayout.error = null
-            
-            val email = emailInput.text.toString().trim()
-            val password = passwordInput.text.toString().trim()
-
-            if (validateInputs(email, password)) {
-                // Save credentials if Remember Me is checked
-                saveCredentialsIfNeeded(email, password)
-                
-                // Attempt login
-                loginWithEmailAndPassword(email, password)
-            }
-        }
-
-        registerLink.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        }
-
-        forgotPasswordLink.setOnClickListener {
-            showForgotPasswordDialog()
-        }
-
-        googleSignInButton.setOnClickListener {
-            signInWithGoogle()
+        // TEMP: Skip all click listeners except admin button for testing
+        try {
+            // These views don't exist in our minimal layout, so we'll skip them
+            Log.d("ADMIN_BTN", "Skipping other click listeners for minimal layout testing")
+        } catch (e: Exception) {
+            Log.e("ADMIN_BTN", "Error in setupClickListeners: ${e.message}")
         }
     }
 
