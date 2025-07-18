@@ -82,7 +82,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        // TEMP: Only find the admin button for testing
+        // TEMP: Log all view IDs to debug
+        val rootView = findViewById<View>(android.R.id.content)
+        Log.d("ADMIN_BTN", "Root view: ${rootView.javaClass.simpleName}")
+        
+        // Try to find the button
         val loginAsAdminButton = findViewById<Button>(R.id.loginAsAdminButton)
         if (loginAsAdminButton != null) {
             Log.d("ADMIN_BTN", "Button found: ${loginAsAdminButton.text}")
@@ -98,10 +102,17 @@ class LoginActivity : AppCompatActivity() {
         } else {
             Log.e("ADMIN_BTN", "Button NOT found!")
             Toast.makeText(this, "Admin button NOT found!", Toast.LENGTH_LONG).show()
+            
+            // Try to find any button
+            val anyButton = findViewById<Button>(android.R.id.button1)
+            if (anyButton != null) {
+                Log.d("ADMIN_BTN", "Found generic button: ${anyButton.text}")
+            } else {
+                Log.e("ADMIN_BTN", "No buttons found at all!")
+            }
         }
         
         // Apply animations
-        val rootView = findViewById<View>(android.R.id.content)
         val fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
         fadeIn.duration = 1000
         rootView.startAnimation(fadeIn)
