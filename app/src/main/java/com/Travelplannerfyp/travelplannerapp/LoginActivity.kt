@@ -63,7 +63,58 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("ADMIN_BTN", "onCreate started")
         setContentView(R.layout.activity_login)
+        Log.d("ADMIN_BTN", "setContentView completed")
+        
+        // Quick test to find the button immediately
+        val testButton = findViewById<Button>(R.id.loginAsAdminButton)
+        if (testButton != null) {
+            Log.d("ADMIN_BTN", "Button found immediately after setContentView: ${testButton.text}")
+            Toast.makeText(this, "Button found immediately!", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.e("ADMIN_BTN", "Button NOT found immediately after setContentView!")
+            Toast.makeText(this, "Button NOT found immediately!", Toast.LENGTH_LONG).show()
+            
+            // Try to find any MaterialButton
+            val anyMaterialButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.loginAsAdminButton)
+            if (anyMaterialButton != null) {
+                Log.d("ADMIN_BTN", "MaterialButton found: ${anyMaterialButton.text}")
+                Toast.makeText(this, "MaterialButton found!", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ADMIN_BTN", "MaterialButton also NOT found!")
+                Toast.makeText(this, "MaterialButton also NOT found!", Toast.LENGTH_LONG).show()
+            }
+            
+            // Try to find any view with that ID
+            val anyView = findViewById<View>(R.id.loginAsAdminButton)
+            if (anyView != null) {
+                Log.d("ADMIN_BTN", "Any view found with ID: ${anyView.javaClass.simpleName}")
+                Toast.makeText(this, "Any view found: ${anyView.javaClass.simpleName}", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ADMIN_BTN", "No view found with that ID at all!")
+                Toast.makeText(this, "No view found with that ID at all!", Toast.LENGTH_LONG).show()
+            }
+            
+            // Test if other elements in the layout are found
+            val containerLayout = findViewById<View>(R.id.containerLayout)
+            if (containerLayout != null) {
+                Log.d("ADMIN_BTN", "Container layout found")
+                Toast.makeText(this, "Container layout found", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ADMIN_BTN", "Container layout NOT found!")
+                Toast.makeText(this, "Container layout NOT found!", Toast.LENGTH_LONG).show()
+            }
+            
+            val loginButton = findViewById<Button>(R.id.loginButton)
+            if (loginButton != null) {
+                Log.d("ADMIN_BTN", "Login button found: ${loginButton.text}")
+                Toast.makeText(this, "Login button found", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ADMIN_BTN", "Login button NOT found!")
+                Toast.makeText(this, "Login button NOT found!", Toast.LENGTH_LONG).show()
+            }
+        }
 
         // Initialize views
         initializeViews()
@@ -79,6 +130,8 @@ class LoginActivity : AppCompatActivity() {
         
         // Load saved credentials if Remember Me was checked
         loadSavedCredentials()
+        
+        Log.d("ADMIN_BTN", "onCreate completed")
     }
 
     private fun initializeViews() {
