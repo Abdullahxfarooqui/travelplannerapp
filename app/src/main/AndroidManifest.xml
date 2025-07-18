@@ -43,7 +43,6 @@
         <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding3" android:exported="false" />
 
         <!-- Authentication -->
-        <activity android:name="com.Travelplannerfyp.travelplannerapp.LoginActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.RegisterActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.OtpVerificationActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.ForgotPasswordActivity" android:exported="false" />
