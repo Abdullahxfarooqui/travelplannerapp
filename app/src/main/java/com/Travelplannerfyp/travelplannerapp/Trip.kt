@@ -17,7 +17,7 @@ data class Trip(
     var startDate: String? = null,
     var endDate: String? = null,
     var departureLocation: String? = null,
-    var pricePerPerson: Double = 0.0,
+    var pricePerPerson: String = "",
     var rating: Float = 0f,
     var category: String? = null,
     var difficulty: String? = null,
@@ -42,7 +42,7 @@ data class Trip(
         startDate = parcel.readString(),
         endDate = parcel.readString(),
         departureLocation = parcel.readString(),
-        pricePerPerson = parcel.readDouble(),
+        pricePerPerson = parcel.readString() ?: "",
         rating = parcel.readFloat(),
         category = parcel.readString(),
         difficulty = parcel.readString(),
@@ -67,7 +67,7 @@ data class Trip(
         parcel.writeString(startDate)
         parcel.writeString(endDate)
         parcel.writeString(departureLocation)
-        parcel.writeDouble(pricePerPerson)
+        parcel.writeString(pricePerPerson)
         parcel.writeFloat(rating)
         parcel.writeString(category)
         parcel.writeString(difficulty)

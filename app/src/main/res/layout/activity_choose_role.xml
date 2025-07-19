@@ -50,14 +50,24 @@
                 android:textColor="@color/white" />
         </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_continue_as_organizer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="As Organizer"
-                android:textSize="15sp"
-                android:background="@drawable/rounded_button"
-                android:textColor="@color/white" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/btn_continue_as_organizer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="As Organizer"
+            android:textSize="15sp"
+            android:background="@drawable/rounded_button"
+            android:textColor="@color/white" />
+
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_continue_as_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_button"
+        android:text="As Admin"
+        android:textColor="@color/white"
+        android:textSize="15sp" />
+</LinearLayout>
 

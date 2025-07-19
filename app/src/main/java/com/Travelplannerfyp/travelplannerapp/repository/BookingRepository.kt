@@ -2,8 +2,6 @@ package com.Travelplannerfyp.travelplannerapp.repository
 
 import android.util.Log
 import com.Travelplannerfyp.travelplannerapp.models.Booking
-import com.Travelplannerfyp.travelplannerapp.models.BookingStatus
-import com.Travelplannerfyp.travelplannerapp.models.BookingType
 import com.Travelplannerfyp.travelplannerapp.models.PaymentStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -57,8 +55,9 @@ class BookingRepository @Inject constructor(
 
             // Check availability and update seats atomically
             val availabilityResult = when (bookingWithId.bookingType) {
-                BookingType.TRIP -> checkAndUpdateTripSeats(bookingWithId)
-                BookingType.PROPERTY -> checkAvailability(bookingWithId)
+                "TRIP" -> checkAndUpdateTripSeats(bookingWithId)
+                "PROPERTY" -> checkAvailability(bookingWithId)
+                else -> Result.failure(Exception("Invalid booking type"))
             }
             
             if (!availabilityResult.isSuccess) {
@@ -116,10 +115,10 @@ class BookingRepository @Inject constructor(
     }
 
     // Update booking status
-    suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Result<Unit> {
+    suspend fun updateBookingStatus(bookingId: String, status: String): Result<Unit> {
         return try {
             val updates = mapOf(
-                "status" to status.name,
+                "status" to status,
                 "updatedAt" to System.currentTimeMillis()
             )
             
@@ -153,7 +152,7 @@ class BookingRepository @Inject constructor(
     suspend fun cancelBooking(bookingId: String, reason: String): Result<Unit> {
         return try {
             val updates = mapOf(
-                "status" to BookingStatus.CANCELLED.name,
+                "status" to "CANCELLED",
                 "cancelled" to true,
                 "cancellationReason" to reason,
                 "updatedAt" to System.currentTimeMillis()
@@ -206,7 +205,7 @@ class BookingRepository @Inject constructor(
     }
 
     // Check if item is available for booking
-    suspend fun checkItemAvailability(itemId: String, startDate: String, endDate: String, bookingType: BookingType): Result<Boolean> {
+    suspend fun checkItemAvailability(itemId: String, startDate: String, endDate: String, bookingType: String): Result<Boolean> {
         return try {
             Log.d(TAG, "Checking availability for itemId: $itemId, startDate: $startDate, endDate: $endDate, type: $bookingType")
             
@@ -230,7 +229,7 @@ class BookingRepository @Inject constructor(
                 if (booking != null && 
                     booking.itemId == itemId &&
                     booking.bookingType == bookingType &&
-                    booking.status != BookingStatus.CANCELLED &&
+                    booking.status != "CANCELLED" &&
                     hasDateConflict(booking.startDate, booking.endDate, startDate, endDate)) {
                     Log.d(TAG, "Found conflicting booking: ${booking.id} - ${booking.startDate} to ${booking.endDate}")
                     conflicts.add(booking)
@@ -368,10 +367,10 @@ class BookingRepository @Inject constructor(
     private suspend fun restoreItemAvailability(booking: Booking) {
         try {
             when (booking.bookingType) {
-                BookingType.PROPERTY -> {
+                "PROPERTY" -> {
                     Log.d(TAG, "Property availability restored for booking: ${booking.id}")
                 }
-                BookingType.TRIP -> {
+                "TRIP" -> {
                     val tripRef = tripsRef.child(booking.itemId)
                     kotlinx.coroutines.suspendCancellableCoroutine<Unit> { cont ->
                         tripRef.runTransaction(object : Transaction.Handler {

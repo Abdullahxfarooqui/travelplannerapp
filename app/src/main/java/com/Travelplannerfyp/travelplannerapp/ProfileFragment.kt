@@ -33,7 +33,9 @@ class ProfileFragment : Fragment() {
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) {
-            Toast.makeText(context, "No image selected", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "No image selected", Toast.LENGTH_SHORT).show()
+            }
             return@registerForActivityResult
         }
 
@@ -52,7 +54,9 @@ class ProfileFragment : Fragment() {
             profileImage.setImageURI(null) // Clear existing image
             profileImage.setImageURI(uri)  // Set new image
         } catch (e: Exception) {
-            Toast.makeText(context, "Failed to save image: ${e.message}", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "Failed to save image: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             Log.e("ProfileFragment", "Failed to save image: ${e.message}")
         }
     }
@@ -79,6 +83,17 @@ class ProfileFragment : Fragment() {
         myBookingsButton = view.findViewById(R.id.myBookingsButton)
         switchRoleButton = view.findViewById(R.id.switchRoleButton)
         logoutButton = view.findViewById(R.id.logoutButton)
+        // Removed adminPanelButton and AdminPanelActivity logic as AdminPanelActivity is deleted.
+        // TODO: Implement new admin panel navigation if needed in the future.
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userRef = databaseReference.child("users").child(currentUser.uid)
+            userRef.child("isAdmin").get().addOnSuccessListener { snapshot ->
+                val isAdmin = snapshot.getValue(Boolean::class.java) == true
+                // Removed adminPanelButton and AdminPanelActivity logic as AdminPanelActivity is deleted.
+                // TODO: Implement new admin panel navigation if needed in the future.
+            }
+        }
         
         // Set up profile image click listener
         profileImage.setOnClickListener {
@@ -93,7 +108,9 @@ class ProfileFragment : Fragment() {
                 startActivity(intent)
             } else {
                 // Redirect to login if not authenticated
-                Toast.makeText(context, "Please log in to edit your profile", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Please log in to edit your profile", Toast.LENGTH_SHORT).show()
+                }
                 val intent = Intent(requireContext(), LoginActivity::class.java)
                 startActivity(intent)
             }
@@ -107,7 +124,9 @@ class ProfileFragment : Fragment() {
                 startActivity(intent)
             } else {
                 // Redirect to login if not authenticated
-                Toast.makeText(context, "Please log in to view your bookings", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Please log in to view your bookings", Toast.LENGTH_SHORT).show()
+                }
                 val intent = Intent(requireContext(), LoginActivity::class.java)
                 startActivity(intent)
             }
@@ -129,7 +148,9 @@ class ProfileFragment : Fragment() {
             }
             
             // Show confirmation message
-            Toast.makeText(context, "Switched to $newRole role", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "Switched to $newRole role", Toast.LENGTH_SHORT).show()
+            }
             
             // Redirect to appropriate activity
             val intent = if (newRole == "Organizer") {
@@ -152,7 +173,9 @@ class ProfileFragment : Fragment() {
             sharedPreferences.edit().clear().apply()
             
             // Show confirmation message
-            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "Logged out successfully", Toast.LENGTH_SHORT).show()
+            }
             
             // Redirect to login screen
             val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -208,6 +231,9 @@ class ProfileFragment : Fragment() {
                     nameTextView.text = currentUser.displayName ?: "Name not set"
                     emailTextView.text = currentUser.email ?: "Email not available"
                     profileImage.setImageResource(R.drawable.ic_profile_placeholder)
+                    context?.let {
+                        Toast.makeText(it, "Error loading profile data: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             })
         } else {

@@ -1,124 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material Design Theme Colors -->
-    <color name="colorPrimary">@color/primary</color>
-    <color name="colorPrimaryDark">@color/primaryDark</color>
-    <color name="colorPrimaryLight">@color/primaryLight</color>
-    <color name="colorSecondary">@color/accent</color>
-    <color name="colorSecondaryDark">@color/accent</color>
-    <color name="colorAccent">@color/accent</color>
-
-    <!-- Primary Colors -->
-    <color name="primary">#2196F3</color>
-    <color name="primaryDark">#1976D2</color>
-    <color name="primaryLight">#BBDEFB</color>
-    <color name="accent">#FF4081</color>
-    <color name="accentLight">#64B5F6</color>
-    <color name="accentDark">#0D47A1</color>
-
-    <!-- Text Colors -->
-    <color name="textPrimary">#212121</color>
-    <color name="textSecondary">#757575</color>
-    <color name="textHint">#BDBDBD</color>
-    <color name="text_primary">@color/textPrimary</color>
-    <color name="text_secondary">@color/textSecondary</color>
-    <color name="textBody">#616161</color>
-
-    <!-- Background Colors -->
-    <color name="backgroundLight">#F5F5F5</color>
-    <color name="backgroundDark">#212121</color>
-    <color name="backgroundSecondary">#F5F5F5</color>
-    <color name="backgroundCard">#FFFFFF</color>
-    <color name="surface">#FFFFFF</color>
-
-    <!-- Status Colors -->
-    <color name="success">#4CAF50</color>
-    <color name="error">#F44336</color>
-    <color name="warning">#FFC107</color>
-    <color name="info">#2196F3</color>
-    <color name="red">@color/error</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
     
-    <!-- Booking Status Colors -->
-    <color name="booking_status_confirmed">#4CAF50</color>
-    <color name="booking_status_pending">#FF9800</color>
-    <color name="booking_status_cancelled">#F44336</color>
-    <color name="booking_status_completed">#2196F3</color>
-    <color name="booking_status_refunded">#9E9E9E</color>
-
-    <!-- Divider Colors -->
-    <color name="divider">#E0E0E0</color>
-    <color name="dividerDark">#BDBDBD</color>
-
+    <!-- Material Design 3 Colors -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_green">#4CAF50</color>
+    <color name="primary_orange">#FF9800</color>
+    <color name="primary_purple">#9C27B0</color>
+    <color name="primary_red">#F44336</color>
+    <color name="primary_yellow">#FFEB3B</color>
+    
+    <!-- Background Colors -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_card">#FFFFFF</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#BDBDBD</color>
+    
+    <!-- Status Colors -->
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_orange">#FF9800</color>
+    <color name="error_red">#F44336</color>
+    <color name="info_blue">#2196F3</color>
+    
+    <!-- Gradient Colors -->
+    <color name="gradient_start">#667eea</color>
+    <color name="gradient_end">#764ba2</color>
+    
+    <!-- Border Colors -->
+    <color name="border_light">#E0E0E0</color>
+    <color name="border_medium">#BDBDBD</color>
+    
+    <!-- Shadow Colors -->
+    <color name="shadow_light">#1A000000</color>
+    <color name="shadow_medium">#33000000</color>
+    
     <!-- Chip Colors -->
     <color name="chipBackground">#E3F2FD</color>
     <color name="chipText">#1976D2</color>
-
-    <!-- Gradient Colors -->
-    <color name="gradientStart">#80000000</color>
-    <color name="gradientEnd">#00000000</color>
-
-    <!-- Stroke Colors -->
-    <color name="strokeLight">#E0E0E0</color>
-    <color name="strokeMedium">#BDBDBD</color>
-
-    <!-- Gray Colors -->
-    <color name="gray">#9E9E9E</color>
-    <color name="lightGray">#F5F5F5</color>
-    <color name="darkGray">#424242</color>
-
-    <!-- Brand Colors -->
+    
+    <!-- Additional Colors for Drawables and Layouts -->
+    <color name="primary">#2196F3</color>
+    <color name="role_badge_background">#E3F2FD</color>
     <color name="Aqua">#00BCD4</color>
-
-    <!-- Standard Colors -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="transparent">#00000000</color>
-
-    <color name="primary_text">#212121</color>
-    <color name="secondary_text">#757575</color>
-
-    <!-- Card Colors -->
+    <color name="accentLight">#64B5F6</color>
+    <color name="backgroundLight">#F5F5F5</color>
+    <color name="strokeLight">#E0E0E0</color>
+    <color name="divider">#E0E0E0</color>
     <color name="card_border">#E0E0E0</color>
     <color name="user_card_background">#F5F5F5</color>
     <color name="user_card_border">#CCCCCC</color>
-    <color name="role_badge_background">#E3F2FD</color>
+    <color name="accent">#FF4081</color>
+    
+    <!-- Gray Scale Colors -->
+    <color name="gray">#9E9E9E</color>
+    <color name="lightGray">#F5F5F5</color>
+    <color name="gray_300">#E0E0E0</color>
+    
+    <!-- Legacy Color Aliases -->
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorSecondary">#4CAF50</color>
+    <color name="colorSecondaryDark">#388E3C</color>
+    <color name="colorAccent">#FF9800</color>
+    <color name="backgroundCard">#FFFFFF</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textHint">#BDBDBD</color>
 
-    <!-- Divider -->
-    <color name="divider_color">#E0E0E0</color>
-
-    <color name="vibrantAccent">#2979FF</color>
-    <color name="teal_700">#018786</color>
-
-    <!-- Background Colors -->
-    <color name="background_light">#F8F9FA</color>
-    <color name="rating_background">#4A4A4A</color>
-
-    <!-- Gray Scale -->
-    <color name="gray_900">#212529</color>
-    <color name="gray_800">#343A40</color>
-    <color name="gray_700">#495057</color>
+    <!-- Additional for legacy/material compatibility -->
+    <color name="colorPrimaryLight">#BBDEFB</color>
     <color name="gray_600">#6C757D</color>
-    <color name="gray_500">#ADB5BD</color>
+    <color name="gray_800">#343A40</color>
     <color name="gray_400">#CED4DA</color>
-    <color name="gray_300">#DEE2E6</color>
-    <color name="gray_200">#E9ECEF</color>
-    <color name="gray_100">#F8F9FA</color>
-
-    <!-- Accent Colors -->
-    <color name="star_color">#FFD700</color>
-    <color name="price_color">#28A745</color>
-    <color name="favorite_active">#FF6B6B</color>
-
-    <color name="md_theme_primary">#6750A4</color>
-    <color name="md_theme_onPrimary">#FFFFFF</color>
-    <color name="md_theme_surface">#FFFBFE</color>
-    <color name="md_theme_surfaceVariant">#E7E0EC</color>
-    <color name="md_theme_onSurface">#1C1B1F</color>
-    <color name="md_theme_onSurfaceVariant">#49454F</color>
-    <color name="md_theme_outlineVariant">#CAC4D0</color>
-
+    <color name="gray_900">#212529</color>
+    <color name="gray_700">#495057</color>
+    <color name="textBody">#616161</color>
     <color name="chipBudget">#E3F2FD</color>
     <color name="chipModerate">#FFF9C4</color>
     <color name="chipLuxury">#F8BBD0</color>
+    <color name="md_theme_blue">#1976D2</color>
+    <color name="md_theme_blue_light">#E3F2FD</color>
+    <color name="md_theme_green">#388E3C</color>
+    <color name="md_theme_green_light">#E8F5E9</color>
 
+    <!-- More for Material/legacy compatibility -->
+    <color name="md_theme_amber">#FFA000</color>
+    <color name="md_theme_amber_light">#FFF8E1</color>
+    <color name="md_theme_grey">#B0BEC5</color>
+    <color name="accentDark">#0D47A1</color>
+    <color name="error">#F44336</color>
+    <color name="md_theme_primary">#6750A4</color>
+    <color name="md_theme_surfaceVariant">#E7E0EC</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_onSurface">#1C1B1F</color>
+    <color name="md_theme_onSurfaceVariant">#49454F</color>
+
+    <!-- Additional missing colors -->
+    <color name="md_theme_surface">#FBFDF9</color>
+    <color name="md_theme_outlineVariant">#BFC9C2</color>
+    <color name="rating_background">#FFD700</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="price_color">#4CAF50</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="booking_status_confirmed">#4CAF50</color>
+    <color name="booking_status_pending">#FFEB3B</color>
+    <color name="booking_status_cancelled">#F44336</color>
+    <color name="booking_status_completed">#2196F3</color>
+    <color name="booking_status_refunded">#9E9E9E</color>
 </resources>

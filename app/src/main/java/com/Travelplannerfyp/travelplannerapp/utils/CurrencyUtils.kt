@@ -69,4 +69,18 @@ object CurrencyUtils {
         formatter.currency = java.util.Currency.getInstance(currencyCode)
         return formatter.format(amount)
     }
+
+    /**
+     * Parse a price string to double, removing commas and currency symbols.
+     */
+    fun parsePrice(price: String): Double {
+        return price.replace(Regex("[^\\d.]"), "").toDoubleOrNull() ?: 0.0
+    }
+
+    /**
+     * Format a double amount as PKR currency (alias for formatAsPKR).
+     */
+    fun formatPrice(amount: Double): String {
+        return formatAsPKR(amount)
+    }
 }

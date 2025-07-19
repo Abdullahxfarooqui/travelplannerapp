@@ -39,7 +39,9 @@ class ProfileImageManager {
         ) {
             try {
                 // Show a loading message
-                Toast.makeText(context, "Processing image...", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Processing image...", Toast.LENGTH_SHORT).show()
+                }
                 
                 // Get input stream from URI
                 val inputStream = context.contentResolver.openInputStream(imageUri)

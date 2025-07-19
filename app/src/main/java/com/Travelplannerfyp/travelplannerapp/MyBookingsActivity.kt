@@ -14,8 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.Travelplannerfyp.travelplannerapp.models.Booking
-import com.Travelplannerfyp.travelplannerapp.models.BookingStatus
-import com.Travelplannerfyp.travelplannerapp.models.BookingType
 import com.Travelplannerfyp.travelplannerapp.repository.BookingRepository
 import com.Travelplannerfyp.travelplannerapp.utils.CurrencyUtils
 import com.google.android.material.chip.ChipGroup
@@ -48,7 +46,7 @@ class MyBookingsActivity : AppCompatActivity() {
     private lateinit var adapter: BookingAdapter
     private val bookingsList = mutableListOf<Booking>()
     private val allBookings = mutableListOf<Booking>()
-    private var currentFilter: BookingStatus? = null
+    private var currentFilter: String? = null // Use string for status filter
     
     companion object {
         private const val TAG = "MyBookingsActivity"
@@ -105,21 +103,21 @@ class MyBookingsActivity : AppCompatActivity() {
         
         activeBookingsChip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                currentFilter = BookingStatus.CONFIRMED
+                currentFilter = "approved"
                 filterBookings()
             }
         }
         
         completedBookingsChip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                currentFilter = BookingStatus.COMPLETED
+                currentFilter = "completed"
                 filterBookings()
             }
         }
         
         cancelledBookingsChip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                currentFilter = BookingStatus.CANCELLED
+                currentFilter = "rejected"
                 filterBookings()
             }
         }
@@ -177,9 +175,9 @@ class MyBookingsActivity : AppCompatActivity() {
             recyclerView.visibility = View.GONE
             
             val message = when (currentFilter) {
-                BookingStatus.CONFIRMED -> "No active bookings found"
-                BookingStatus.COMPLETED -> "No completed bookings found"
-                BookingStatus.CANCELLED -> "No cancelled bookings found"
+                "approved" -> "No active bookings found"
+                "completed" -> "No completed bookings found"
+                "rejected" -> "No cancelled bookings found"
                 else -> "No bookings found"
             }
             emptyView.text = message
@@ -210,7 +208,7 @@ class MyBookingsActivity : AppCompatActivity() {
         }
         
         // Add cancel booking option for active bookings
-        if (booking.status == BookingStatus.CONFIRMED || booking.status == BookingStatus.PENDING) {
+        if (booking.status == "approved" || booking.status == "pending") {
             dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel Booking") { _, _ ->
                 dialog.dismiss()
                 showCancelBookingDialog(booking)
@@ -225,32 +223,33 @@ class MyBookingsActivity : AppCompatActivity() {
         val createdDateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
         
         // Set booking title and confirmation code
-        dialogView.findViewById<TextView>(R.id.bookingTitle).text = booking.itemName
+        dialogView.findViewById<TextView>(R.id.bookingTitle).text = 
+            if (booking.tripName.isNotEmpty()) booking.tripName else booking.itemName
         dialogView.findViewById<TextView>(R.id.bookingConfirmationCode).text = "Code: ${booking.confirmationCode}"
         
         // Set status badge with appropriate color
         val statusBadge = dialogView.findViewById<TextView>(R.id.bookingStatusBadge)
-        statusBadge.text = booking.status.name
+        statusBadge.text = booking.status.replaceFirstChar { it.uppercase() }
         val statusColor = when (booking.status) {
-            BookingStatus.CONFIRMED -> ContextCompat.getColor(this, R.color.booking_status_confirmed)
-            BookingStatus.PENDING -> ContextCompat.getColor(this, R.color.booking_status_pending)
-            BookingStatus.CANCELLED -> ContextCompat.getColor(this, R.color.booking_status_cancelled)
-            BookingStatus.COMPLETED -> ContextCompat.getColor(this, R.color.booking_status_completed)
-            BookingStatus.REFUNDED -> ContextCompat.getColor(this, R.color.booking_status_refunded)
+            "approved" -> ContextCompat.getColor(this, R.color.booking_status_confirmed)
+            "pending" -> ContextCompat.getColor(this, R.color.booking_status_pending)
+            "rejected" -> ContextCompat.getColor(this, R.color.booking_status_cancelled)
+            "completed" -> ContextCompat.getColor(this, R.color.booking_status_completed)
+            "refunded" -> ContextCompat.getColor(this, R.color.booking_status_refunded)
             else -> ContextCompat.getColor(this, R.color.gray)
         }
         statusBadge.setBackgroundColor(statusColor)
         
         // Set booking type
         dialogView.findViewById<TextView>(R.id.bookingTypeText).text = 
-            if (booking.bookingType == BookingType.TRIP) "Trip" else "Property"
+            if (booking.bookingType == "TRIP") "Trip" else "Property"
         
         // Set dates
         dialogView.findViewById<TextView>(R.id.bookingDatesText).text = 
             "${booking.startDate} - ${booking.endDate}"
         
         // Set guests/seats
-        val guestText = if (booking.bookingType == BookingType.TRIP) {
+        val guestText = if (booking.bookingType == "TRIP") {
             "${booking.numberOfGuests} seats"
         } else {
             "${booking.numberOfGuests} guests"
@@ -258,7 +257,7 @@ class MyBookingsActivity : AppCompatActivity() {
         dialogView.findViewById<TextView>(R.id.bookingGuestsText).text = guestText
         
         // Set payment status
-        dialogView.findViewById<TextView>(R.id.bookingPaymentText).text = booking.paymentStatus.name
+        dialogView.findViewById<TextView>(R.id.bookingPaymentText).text = booking.paymentStatus
         
         // Set pricing details
         dialogView.findViewById<TextView>(R.id.bookingBasePriceText).text = 
@@ -269,7 +268,7 @@ class MyBookingsActivity : AppCompatActivity() {
             CurrencyUtils.formatAsPKR(booking.totalAmount)
         // Show hotel charges for trip bookings
         val hotelChargesText = dialogView.findViewById<TextView>(R.id.bookingHotelChargesText)
-        if (booking.bookingType == BookingType.TRIP) {
+        if (booking.bookingType == "TRIP") {
             val hotelCharges = booking.totalAmount - booking.basePrice - booking.serviceFee
             hotelChargesText.text = CurrencyUtils.formatAsPKR(hotelCharges)
         } else {
@@ -296,7 +295,7 @@ class MyBookingsActivity : AppCompatActivity() {
         
         // Set booking type icon
         val bookingTypeIcon = dialogView.findViewById<ImageView>(R.id.bookingTypeIcon)
-        if (booking.bookingType == BookingType.TRIP) {
+        if (booking.bookingType == "TRIP") {
             bookingTypeIcon.setImageResource(R.drawable.ic_trips)
         } else {
             bookingTypeIcon.setImageResource(R.drawable.ic_plan)
@@ -383,20 +382,20 @@ class BookingAdapter(
         }
         
         fun bind(booking: Booking) {
-            itemNameTextView.text = booking.itemName
-            bookingTypeTextView.text = if (booking.bookingType == BookingType.TRIP) "Trip" else "Property"
-            statusTextView.text = booking.status.name
+            itemNameTextView.text = if (booking.tripName.isNotEmpty()) booking.tripName else booking.itemName
+            bookingTypeTextView.text = if (booking.bookingType == "TRIP") "Trip" else "Property"
+            statusTextView.text = booking.status.replaceFirstChar { it.uppercase() }
             dateTextView.text = "${booking.startDate} - ${booking.endDate}"
             amountTextView.text = CurrencyUtils.formatAsPKR(booking.totalAmount)
             confirmationCodeTextView.text = "Code: ${booking.confirmationCode}"
             
             // Set status color using color resources for better accessibility
             val statusColor = when (booking.status) {
-                BookingStatus.CONFIRMED -> ContextCompat.getColor(itemView.context, R.color.booking_status_confirmed)
-                BookingStatus.PENDING -> ContextCompat.getColor(itemView.context, R.color.booking_status_pending)
-                BookingStatus.CANCELLED -> ContextCompat.getColor(itemView.context, R.color.booking_status_cancelled)
-                BookingStatus.COMPLETED -> ContextCompat.getColor(itemView.context, R.color.booking_status_completed)
-                BookingStatus.REFUNDED -> ContextCompat.getColor(itemView.context, R.color.booking_status_refunded)
+                "approved" -> ContextCompat.getColor(itemView.context, R.color.booking_status_confirmed)
+                "pending" -> ContextCompat.getColor(itemView.context, R.color.booking_status_pending)
+                "rejected" -> ContextCompat.getColor(itemView.context, R.color.booking_status_cancelled)
+                "completed" -> ContextCompat.getColor(itemView.context, R.color.booking_status_completed)
+                "refunded" -> ContextCompat.getColor(itemView.context, R.color.booking_status_refunded)
                 else -> ContextCompat.getColor(itemView.context, R.color.gray)
             }
             statusTextView.setTextColor(statusColor)

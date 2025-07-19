@@ -28,10 +28,12 @@
             android:name="com.Travelplannerfyp.travelplannerapp.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Travelplannerapp.NoActionBar">
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
         </activity>
 
         <!-- Onboarding Screens -->
@@ -40,10 +42,17 @@
         <activity android:name="com.Travelplannerfyp.travelplannerapp.onboarding3" android:exported="false" />
 
         <!-- Authentication -->
-        <activity android:name="com.Travelplannerfyp.travelplannerapp.LoginActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.LoginActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.Travelplannerfyp.travelplannerapp.RegisterActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.OtpVerificationActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.AdminSignUpActivity" android:exported="false" />
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.AdminLoginActivity" android:exported="false" />
 
         <!-- Main App Screens -->
         <activity android:name="com.Travelplannerfyp.travelplannerapp.MainActivity" android:exported="false" />
@@ -79,6 +88,19 @@
 
         <!-- Admin/Data Migration -->
         <activity android:name="com.Travelplannerfyp.travelplannerapp.UpdateHotelImageNamesActivity" android:exported="false" />
+        <!-- Admin Dashboard -->
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.AdminDashboardActivity" android:exported="false" />
+
+        <!-- FileProvider for CSV Export -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

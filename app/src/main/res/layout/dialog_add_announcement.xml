@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/inputAnnouncementTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Title"
+        android:inputType="text"
+        android:textColorHint="@color/textSecondary"
+        android:textColor="@color/textPrimary"
+        android:backgroundTint="@color/primary_blue" />
+
+    <EditText
+        android:id="@+id/inputAnnouncementMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Message"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:textColorHint="@color/textSecondary"
+        android:textColor="@color/textPrimary"
+        android:backgroundTint="@color/primary_blue"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout> 

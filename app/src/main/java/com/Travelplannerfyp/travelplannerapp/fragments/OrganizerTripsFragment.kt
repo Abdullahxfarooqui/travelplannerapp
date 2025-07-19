@@ -73,7 +73,9 @@ class OrganizerTripsFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = OrganizerTripsAdapter(organizerTrips, houseBookings) { tripData ->
             // Handle trip click - could show detailed enrolled users view
-            Toast.makeText(context, "Trip: ${tripData.trip.placeName}", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "Trip: ${tripData.trip.placeName}", Toast.LENGTH_SHORT).show()
+            }
         }
         recyclerView.adapter = adapter
     }

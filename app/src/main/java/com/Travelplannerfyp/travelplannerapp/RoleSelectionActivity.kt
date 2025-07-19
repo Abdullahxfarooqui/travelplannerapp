@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.Travelplannerfyp.travelplannerapp.R
+import com.google.firebase.auth.FirebaseAuth
 
 class RoleSelectionActivity : AppCompatActivity() {
 
@@ -23,7 +24,15 @@ class RoleSelectionActivity : AppCompatActivity() {
         fadeIn.duration = 1000
         findViewById<LinearLayout>(R.id.containerLayout).startAnimation(fadeIn)
 
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+        val adminEmail = "abdullahxfarooquii@gmail.com"
+
         userButton.setOnClickListener {
+            if (currentUser != null && currentUser.email.equals(adminEmail, ignoreCase = true)) {
+                android.widget.Toast.makeText(this, "Admin account cannot be used as a user.", android.widget.Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
             sharedPreferences.edit().apply {
                 putString("SelectedRole", "User")
@@ -38,6 +47,10 @@ class RoleSelectionActivity : AppCompatActivity() {
         }
 
         organizerButton.setOnClickListener {
+            if (currentUser != null && currentUser.email.equals(adminEmail, ignoreCase = true)) {
+                android.widget.Toast.makeText(this, "Admin account cannot be used as an organizer.", android.widget.Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             val sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
             sharedPreferences.edit().apply {
                 putString("SelectedRole", "Organizer")

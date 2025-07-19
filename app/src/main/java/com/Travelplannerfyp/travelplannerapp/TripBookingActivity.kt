@@ -8,7 +8,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.Travelplannerfyp.travelplannerapp.models.Booking
-import com.Travelplannerfyp.travelplannerapp.models.BookingType
 import com.Travelplannerfyp.travelplannerapp.Trip
 import com.Travelplannerfyp.travelplannerapp.repository.BookingRepository
 import com.google.android.material.button.MaterialButton
@@ -240,7 +239,7 @@ class TripBookingActivity : AppCompatActivity() {
                     seatsAvailable = 5, // Default seats (matching TripDetailActivity)
                     startDate = startDate,
                     endDate = endDate, // Multi-day trip
-                    pricePerPerson = 150.0 // Default price
+                    pricePerPerson = "150" // Default price
                 )
                 Log.d(TAG, "Created multi-day trip - Start: $startDate, End: $endDate")
                 trip = mockTrip
@@ -250,7 +249,7 @@ class TripBookingActivity : AppCompatActivity() {
                 Log.e(TAG, "Invalid tripId format: $tripId (expected at least 4 parts, got ${parts.size})")
                 Toast.makeText(this, "Invalid trip information", Toast.LENGTH_SHORT).show()
                 finish()
-            }
+            } 
         } catch (e: Exception) {
             Log.e(TAG, "Error creating trip from tripId: ${e.message}")
             Toast.makeText(this, "Error loading trip details", Toast.LENGTH_SHORT).show()
@@ -347,10 +346,10 @@ class TripBookingActivity : AppCompatActivity() {
         
         // Fetch real-time price from Firebase - check multiple possible price fields
         val pricePerPerson = when {
-            data["tripPrice"] != null -> (data["tripPrice"] as? String)?.toDoubleOrNull() ?: 150.0
-            data["pricePerPerson"] != null -> (data["pricePerPerson"] as? String)?.toDoubleOrNull() ?: 150.0
-            data["price"] != null -> (data["price"] as? String)?.toDoubleOrNull() ?: 150.0
-            else -> 150.0 // Default price if no price field found
+            data["tripPrice"] != null -> data["tripPrice"].toString()
+            data["pricePerPerson"] != null -> data["pricePerPerson"].toString()
+            data["price"] != null -> data["price"].toString()
+            else -> "150"
         }
         
         Log.d(TAG, "Creating trip from Firebase data - Seats: $seatsAvailable, Price: $pricePerPerson")
@@ -646,7 +645,7 @@ class TripBookingActivity : AppCompatActivity() {
     
     private fun calculatePricing() {
         val trip = this.trip ?: return
-        val pricePerPerson = trip.pricePerPerson
+        val pricePerPerson = trip.pricePerPerson.toDoubleOrNull() ?: 0.0
         val baseAmount = pricePerPerson * numberOfSeats
         val hotelTotal = hotelPricePerNight * hotelNights * numberOfSeats
         val serviceFee = (baseAmount + hotelTotal) * 0.10 // 10% service fee
@@ -654,7 +653,7 @@ class TripBookingActivity : AppCompatActivity() {
         pricePerPersonTextView.text = CurrencyUtils.formatAsPKR(pricePerPerson) + " per person"
         findViewById<TextView>(R.id.hotelPricePerNightTextView)?.text = CurrencyUtils.formatAsPKR(hotelPricePerNight) + "/night"
         findViewById<TextView>(R.id.hotelNightsTextView)?.text = hotelNights.toString()
-        findViewById<TextView>(R.id.hotelTotalTextView)?.text = CurrencyUtils.formatAsPKR(hotelPricePerNight) + " x $hotelNights night(s) x $numberOfSeats = " + CurrencyUtils.formatAsPKR(hotelTotal)
+        findViewById<TextView>(R.id.hotelTotalTextView)?.text = CurrencyUtils.formatAsPKR(hotelTotal) + " x $hotelNights night(s) x $numberOfSeats = " + CurrencyUtils.formatAsPKR(hotelTotal)
         serviceFeeTextView.text = CurrencyUtils.formatAsPKR(serviceFee)
         totalAmountTextView.text = CurrencyUtils.formatAsPKR(totalAmount)
 
@@ -682,7 +681,7 @@ class TripBookingActivity : AppCompatActivity() {
             Start Date: ${trip.startDate}
             End Date: ${trip.endDate}
             Seats: $numberOfSeats
-            Price per person: ${CurrencyUtils.formatAsPKR(trip.pricePerPerson)}
+            Price per person: ${CurrencyUtils.formatAsPKR(trip.pricePerPerson.toDoubleOrNull() ?: 0.0)}
             Total: ${CurrencyUtils.formatAsPKR(calculateTotalAmount())}
             
             Special Requests: ${specialRequestsEditText.text.toString().ifEmpty { "None" }}
@@ -700,7 +699,7 @@ class TripBookingActivity : AppCompatActivity() {
     
     private fun calculateTotalAmount(): Double {
         val trip = this.trip ?: return 0.0
-        val baseAmount = trip.pricePerPerson * numberOfSeats
+        val baseAmount = (trip.pricePerPerson.toDoubleOrNull() ?: 0.0) * numberOfSeats
         val hotelTotal = hotelPricePerNight * hotelNights * numberOfSeats
         val serviceFee = (baseAmount + hotelTotal) * 0.10
         return baseAmount + hotelTotal + serviceFee
@@ -724,7 +723,7 @@ class TripBookingActivity : AppCompatActivity() {
         
         val booking = Booking(
             userId = currentUser.uid, // Ensure user ID is set
-            bookingType = BookingType.TRIP,
+            bookingType = "TRIP", // Use string value
             itemId = trip.id,
             itemName = trip.name ?: "",
             itemImageUrl = trip.imageUrl ?: "",
@@ -732,8 +731,8 @@ class TripBookingActivity : AppCompatActivity() {
             endDate = trip.endDate ?: "",
             numberOfGuests = numberOfSeats,
             totalAmount = calculateTotalAmount(),
-            basePrice = (trip.pricePerPerson ?: 0.0) * numberOfSeats,
-            serviceFee = ((trip.pricePerPerson ?: 0.0) * numberOfSeats) * 0.10,
+            basePrice = (trip.pricePerPerson.toDoubleOrNull() ?: 0.0) * numberOfSeats,
+            serviceFee = ((trip.pricePerPerson.toDoubleOrNull() ?: 0.0) * numberOfSeats) * 0.10,
             specialRequests = specialRequestsEditText.text.toString(),
             hostId = trip.id, // Trip organizer ID
             hostName = trip.organizerName ?: "",

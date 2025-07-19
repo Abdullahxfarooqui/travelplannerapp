@@ -127,26 +127,19 @@ class HomeFragment : Fragment() {
         databaseReference.child("recommended_trips").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val trips = mutableListOf<Trip>()
-                Log.d("HomeFragment", "Received data snapshot for recommended trips: ${snapshot.childrenCount} items")
+                Log.d("HomeFragment", "Received data snapshot for recommended trips: "+snapshot.childrenCount+" items")
                 for (tripSnapshot in snapshot.children) {
                     try {
                         val name = tripSnapshot.child("name").getValue(String::class.java) ?: ""
                         val location = tripSnapshot.child("location").getValue(String::class.java) ?: ""
                         val description = tripSnapshot.child("description").getValue(String::class.java) ?: ""
                         val imageUrl = tripSnapshot.child("imageUrl").getValue(String::class.java)
-                        
-                        // First try to get imageResId from Firebase
                         val imageResIdStr = tripSnapshot.child("imageResId").getValue(String::class.java)
-                        
-                        // Get local image resource ID based on Firebase value or trip name
-                        val imageResId = if (!imageResIdStr.isNullOrEmpty()) {
-                            // Try to get resource ID from the string value in Firebase
-                            resources.getIdentifier(imageResIdStr, "drawable", requireContext().packageName)
+                        val imageResId = if (!imageResIdStr.isNullOrEmpty() && context != null) {
+                            resources.getIdentifier(imageResIdStr, "drawable", context!!.packageName)
                         } else {
-                            // Fallback to name-based lookup
                             getLocalImageResource(name)
                         }
-
                         val trip = Trip(
                             name = name,
                             location = location,
@@ -160,21 +153,20 @@ class HomeFragment : Fragment() {
                         Log.e("HomeFragment", "Error parsing trip data: ${e.message}")
                     }
                 }
-
                 if (trips.isEmpty()) {
                     Log.w("HomeFragment", "No recommended trips found in the database, adding fallback trips")
                     addFallbackRecommendedTrips(trips)
                 }
-
                 originalRecommendedTrips.clear()
                 originalRecommendedTrips.addAll(trips)
                 recommendedAdapter.updateTrips(trips)
                 Log.d("HomeFragment", "Updating adapter with ${trips.size} recommended trips")
             }
-
             override fun onCancelled(error: DatabaseError) {
-                Log.e("HomeFragment", "Error loading recommended trips: ${error.message}")
-                Toast.makeText(context, "Failed to load recommended trips", Toast.LENGTH_SHORT).show()
+                Log.e("HomeFragment", "Error loading recommended trips: "+error.message)
+                context?.let {
+                    Toast.makeText(it, "Failed to load recommended trips", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }
@@ -185,31 +177,22 @@ class HomeFragment : Fragment() {
             databaseReference.child("available_trips").removeEventListener(it)
             Log.d("HomeFragment", "Removed existing listener")
         }
-
         availableTripsListener = databaseReference.child("available_trips").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val trips = mutableListOf<Trip>()
                 Log.d("HomeFragment", "Received data snapshot for available trips: ${snapshot.childrenCount} items")
-
                 for (tripSnapshot in snapshot.children) {
                     try {
                         val name = tripSnapshot.child("name").getValue(String::class.java) ?: ""
                         val location = tripSnapshot.child("location").getValue(String::class.java) ?: ""
                         val description = tripSnapshot.child("description").getValue(String::class.java) ?: ""
                         val imageUrl = tripSnapshot.child("imageUrl").getValue(String::class.java)
-                        
-                        // First try to get imageResId from Firebase
                         val imageResIdStr = tripSnapshot.child("imageResId").getValue(String::class.java)
-                        
-                        // Get local image resource ID based on Firebase value or trip name
-                        val imageResId = if (!imageResIdStr.isNullOrEmpty()) {
-                            // Try to get resource ID from the string value in Firebase
-                            resources.getIdentifier(imageResIdStr, "drawable", requireContext().packageName)
+                        val imageResId = if (!imageResIdStr.isNullOrEmpty() && context != null) {
+                            resources.getIdentifier(imageResIdStr, "drawable", context!!.packageName)
                         } else {
-                            // Fallback to name-based lookup
                             getLocalImageResource(name)
                         }
-
                         val trip = Trip(
                             name = name,
                             location = location,
@@ -223,21 +206,20 @@ class HomeFragment : Fragment() {
                         Log.e("HomeFragment", "Error parsing trip data: ${e.message}")
                     }
                 }
-
                 if (trips.isEmpty()) {
                     Log.w("HomeFragment", "No available trips found in the database, adding fallback trips")
                     addFallbackAvailableTrips(trips)
                 }
-
                 originalAvailableTrips.clear()
                 originalAvailableTrips.addAll(trips)
                 availableAdapter.updateTrips(trips)
                 Log.d("HomeFragment", "Updating adapter with ${trips.size} available trips")
             }
-
             override fun onCancelled(error: DatabaseError) {
                 Log.e("HomeFragment", "Error loading available trips: ${error.message}")
-                Toast.makeText(context, "Failed to load available trips", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Failed to load available trips", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }

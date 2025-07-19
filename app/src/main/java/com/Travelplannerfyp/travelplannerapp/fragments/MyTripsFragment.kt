@@ -352,7 +352,9 @@ class MyTripsFragment : Fragment() {
 
     private fun handleJoinTrip(trip: EnhancedTrip) {
         // This shouldn't be called in My Trips tab, but handle it gracefully
-        Toast.makeText(context, "Already joined this trip", Toast.LENGTH_SHORT).show()
+        context?.let {
+            Toast.makeText(it, "Already joined this trip", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showLoading(show: Boolean) {

@@ -348,7 +348,9 @@ class ExploreTripsFragment : Fragment() {
 
     private fun handleJoinTrip(trip: EnhancedTrip) {
         if (currentUserId.isEmpty()) {
-            Toast.makeText(context, "Please log in to join trips", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "Please log in to join trips", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
@@ -358,17 +360,23 @@ class ExploreTripsFragment : Fragment() {
         
         // Check if user is already joined
         if (trip.joinedUsers.contains(currentUserId)) {
-            Toast.makeText(context, "You have already joined this trip", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "You have already joined this trip", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
         // Add user to joined users
         tripRef.child("joinedUsers").child(currentUserId).setValue(true)
             .addOnSuccessListener {
-                Toast.makeText(context, "Successfully joined trip: ${trip.placeName}", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Successfully joined trip: ${trip.placeName}", Toast.LENGTH_SHORT).show()
+                }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Failed to join trip: ${e.message}", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Failed to join trip: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 

@@ -10,7 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.Travelplannerfyp.travelplannerapp.models.Booking
-import com.Travelplannerfyp.travelplannerapp.models.BookingType
 import com.Travelplannerfyp.travelplannerapp.PropertyListing
 import com.Travelplannerfyp.travelplannerapp.repository.BookingRepository
 import com.Travelplannerfyp.travelplannerapp.utils.CurrencyUtils
@@ -366,9 +365,9 @@ class PropertyBookingActivity : AppCompatActivity() {
         
         val booking = Booking(
             userId = currentUser.uid, // Ensure user ID is set
-            bookingType = BookingType.PROPERTY,
+            bookingType = "PROPERTY", // Use string value
             itemId = property.id,
-            itemName = property.title,
+            itemName = property.title ?: "",
             itemImageUrl = property.imageUrls.firstOrNull() ?: "",
             startDate = dateFormat.format(selectedCheckInDate!!.time),
             endDate = dateFormat.format(selectedCheckOutDate!!.time),
@@ -377,14 +376,15 @@ class PropertyBookingActivity : AppCompatActivity() {
             numberOfGuests = numberOfGuests,
             numberOfNights = numberOfNights,
             totalAmount = calculateTotalAmount(),
-            basePrice = property.pricePerNight * numberOfNights,
+            basePrice = (property.pricePerNight ?: 0.0) * numberOfNights,
             cleaningFee = property.cleaningFee,
             securityDeposit = property.securityDeposit,
-            serviceFee = (property.pricePerNight * numberOfNights) * 0.10,
+            serviceFee = ((property.pricePerNight ?: 0.0) * numberOfNights) * 0.10,
             specialRequests = specialRequestsEditText.text.toString(),
-            hostId = property.hostId,
-            hostName = property.hostName,
-            hostPhone = property.hostPhoneNumber
+            hostId = property.hostId ?: "",
+            hostName = property.hostName ?: "",
+            hostPhone = property.hostPhoneNumber ?: "",
+            // ... other fields as needed ...
         )
         
         Log.d(TAG, "Booking object created - UserID: ${booking.userId}, ItemID: ${booking.itemId}, Amount: ${booking.totalAmount}")

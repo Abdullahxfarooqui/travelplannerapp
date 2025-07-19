@@ -25,9 +25,9 @@ class ReservationAdapter(private val items: List<Booking>) : RecyclerView.Adapte
 
     override fun onBindViewHolder(holder: ReservationViewHolder, position: Int) {
         val item = items[position]
-        holder.itemNameTextView.text = item.itemName
-        holder.bookingTypeTextView.text = item.bookingType.name
-        holder.statusTextView.text = item.status.name
+        holder.itemNameTextView.text = if (item.tripName.isNotEmpty()) item.tripName else item.itemName
+        holder.bookingTypeTextView.text = if (item.bookingType == "TRIP") "Trip" else "Property"
+        holder.statusTextView.text = item.status.replaceFirstChar { it.uppercase() }
         holder.confirmationCodeTextView.text = "Code: ${item.confirmationCode}"
         holder.dateTextView.text = "${item.startDate} - ${item.endDate}"
         holder.amountTextView.text = "$${String.format("%,.2f", item.totalAmount)}"

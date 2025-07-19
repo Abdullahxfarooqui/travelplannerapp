@@ -58,6 +58,12 @@ class RegisterActivity : AppCompatActivity() {
             val password = passwordInput.text.toString().trim()
             val confirmPassword = confirmPasswordInput.text.toString().trim()
 
+            // Prevent registration with admin email
+            if (email.equals("abdullahxfarooquii@gmail.com", ignoreCase = true)) {
+                Toast.makeText(this, "This email is reserved for admin. Please use a different email.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             if (!validateInputs(email, password, confirmPassword)) {
                 return@setOnClickListener
             }
@@ -78,11 +84,10 @@ class RegisterActivity : AppCompatActivity() {
                                         Log.d(TAG, "Verification email sent.")
                                         // Create user data in Realtime Database (without OTP)
                                         val userData = mapOf(
+                                            "name" to email.substringBefore("@"), // Use email prefix as name
                                             "email" to email,
                                             "createdAt" to System.currentTimeMillis(),
-                                            "lastLogin" to System.currentTimeMillis(),
-                                            "emailVerified" to false // Keep this false until user verifies via email link
-                                            // Removed "otp" field
+                                            "status" to "active"
                                         )
 
                                         database.child("users").child(user.uid)
@@ -127,6 +132,12 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             // Don't finish here, allow user to go back if needed
+        }
+
+        // Set up admin sign up button
+        val adminSignUpButton: Button = findViewById(R.id.adminSignUpButton)
+        adminSignUpButton.setOnClickListener {
+            startActivity(Intent(this, AdminSignUpActivity::class.java))
         }
     }
     

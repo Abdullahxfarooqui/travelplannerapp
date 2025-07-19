@@ -17,7 +17,7 @@ class onboarding3 : AppCompatActivity() {
         val getStartedButton: Button = findViewById(R.id.btn_get_started)
 
         getStartedButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, activity_choose_role::class.java)
             startActivity(intent)
             finish()
         }

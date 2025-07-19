@@ -158,6 +158,20 @@
                         android:visibility="gone" />
                 </FrameLayout>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/adminSignUpButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sign up as Admin"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins_regular"
+                    app:cornerRadius="12dp"
+                    android:elevation="4dp"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/primary" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

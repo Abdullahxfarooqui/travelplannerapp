@@ -21,7 +21,9 @@ class TripAdapter(private val context: Context, private var tripList: List<Trip>
     override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
         val trip = tripList[position]
         holder.bind(trip)
-
+        // Display price as Rs. <pricePerPerson>
+        holder.itemView.findViewById<TextView>(R.id.tripPriceTextView)?.text =
+            if (!trip.pricePerPerson.isNullOrEmpty()) "Rs. ${trip.pricePerPerson}" else "Price: Not set"
         // Add debug logging to track binding
         Log.d("TripAdapter", "Binding trip at position $position: ${trip.name}, imageUrl: ${trip.imageUrl}, imageResId: ${trip.imageResId}")
 

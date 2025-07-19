@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tripTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trip Title"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#222" />
+
+        <TextView
+            android:id="@+id/tripOrganizer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Organizer: "
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tripPriceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price: Rs. 0"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tripStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: "
+            android:textSize="14sp"
+            android:textColor="#888"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/seatsAvailableTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seats: 0"
+            android:textSize="14sp"
+            android:textColor="#888"
+            android:layout_marginTop="4dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnDeleteTrip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Delete"
+                android:textSize="12sp"
+                android:backgroundTint="#fff"
+                android:textColor="#D32F2F"
+                android:layout_marginEnd="8dp"
+                style="@android:style/Widget.Material.Button.Borderless"/>
+
+            <Button
+                android:id="@+id/btnEditTrip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Edit"
+                android:textSize="12sp"
+                android:backgroundTint="#fff"
+                android:textColor="#1976D2"
+                android:layout_marginEnd="8dp"
+                style="@android:style/Widget.Material.Button.Borderless"/>
+
+            <Button
+                android:id="@+id/btnFeatureTrip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Mark as Featured"
+                android:textSize="12sp"
+                android:backgroundTint="#fff"
+                android:textColor="#1976D2"
+                style="@android:style/Widget.Material.Button.Borderless"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView> 
