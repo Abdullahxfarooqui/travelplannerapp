@@ -4,20 +4,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.Travelplannerfyp.travelplannerapp.R
 
 class AdminLoginActivity : AppCompatActivity() {
-    private lateinit var emailInput: EditText
-    private lateinit var passwordInput: EditText
-    private lateinit var loginButton: Button
-    private lateinit var progressBar: ProgressBar
+    private lateinit var emailInput: TextInputEditText
+    private lateinit var passwordInput: TextInputEditText
+    private lateinit var loginButton: MaterialButton
+    private lateinit var progressBar: CircularProgressIndicator
+    private lateinit var toolbar: MaterialToolbar
     private val adminEmail = "abdullahxfarooquii@gmail.com"
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance().reference
@@ -26,14 +28,23 @@ class AdminLoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_login)
 
+        // Initialize views
         emailInput = findViewById(R.id.adminEmailInput)
         passwordInput = findViewById(R.id.adminPasswordInput)
         loginButton = findViewById(R.id.adminLoginButton)
         progressBar = findViewById(R.id.adminLoginProgressBar)
+        toolbar = findViewById(R.id.toolbar)
+
+        // Setup toolbar
+        setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         loginButton.setOnClickListener {
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString().trim()
+            
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 emailInput.error = "Enter a valid email"
                 return@setOnClickListener
@@ -46,10 +57,15 @@ class AdminLoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Only the admin email can log in here.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            
             progressBar.visibility = View.VISIBLE
+            loginButton.isEnabled = false
+            
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     progressBar.visibility = View.GONE
+                    loginButton.isEnabled = true
+                    
                     if (task.isSuccessful) {
                         val user = auth.currentUser
                         val uid = user?.uid

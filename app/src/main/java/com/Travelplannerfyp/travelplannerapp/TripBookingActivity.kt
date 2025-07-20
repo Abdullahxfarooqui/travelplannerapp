@@ -249,7 +249,7 @@ class TripBookingActivity : AppCompatActivity() {
                 Log.e(TAG, "Invalid tripId format: $tripId (expected at least 4 parts, got ${parts.size})")
                 Toast.makeText(this, "Invalid trip information", Toast.LENGTH_SHORT).show()
                 finish()
-            } 
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating trip from tripId: ${e.message}")
             Toast.makeText(this, "Error loading trip details", Toast.LENGTH_SHORT).show()

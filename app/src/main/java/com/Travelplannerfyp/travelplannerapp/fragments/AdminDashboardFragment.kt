@@ -46,6 +46,7 @@ import android.widget.Toast
 import com.Travelplannerfyp.travelplannerapp.LoginActivity
 import android.util.Log
 import android.widget.Button
+import com.google.android.material.button.MaterialButton
 
 class AdminDashboardFragment : Fragment() {
 
@@ -53,8 +54,6 @@ class AdminDashboardFragment : Fragment() {
     private lateinit var tvTotalBookings: TextView
     private lateinit var tvTotalRevenue: TextView
     private lateinit var tvTotalTrips: TextView
-    private lateinit var chartBookings: LineChart
-    private lateinit var chartRevenue: LineChart
     private lateinit var loadingLayout: LinearLayout
     private lateinit var emptyLayout: LinearLayout
     private lateinit var recyclerTrips: RecyclerView
@@ -282,39 +281,31 @@ class AdminDashboardFragment : Fragment() {
         recyclerFeedback.adapter = feedbackAdapter
         fetchFeedback()
 
-        recyclerAnnouncements = view.findViewById(R.id.recyclerAnnouncements)
-        btnAddAnnouncement = view.findViewById(R.id.btnAddAnnouncement)
-        announcementAdapter = AnnouncementAdapter(announcementsList, onDelete = { announcement -> deleteAnnouncement(announcement) })
-        recyclerAnnouncements.layoutManager = LinearLayoutManager(requireContext())
-        recyclerAnnouncements.adapter = announcementAdapter
-        fetchAnnouncements()
-        btnAddAnnouncement.setOnClickListener { showAddAnnouncementDialog() }
+        // Find the export CSV button in the new layout
+        val exportCsvButton = view.findViewById<MaterialButton>(R.id.exportCsvButton)
+        exportCsvButton?.setOnClickListener { exportBookingsCsv() }
 
-        btnExportBookings = view.findViewById(R.id.btnExportBookings)
-        btnExportRevenue = view.findViewById(R.id.btnExportRevenue)
-        btnExportBookings.setOnClickListener { exportBookingsCsv() }
-        btnExportRevenue.setOnClickListener { exportRevenueCsv() }
-        btnLogout = view.findViewById(R.id.btnLogout)
-        btnLogout.setOnClickListener { logout() }
+        // Find the add announcement button in the new layout
+        val addAnnouncementButton = view.findViewById<MaterialButton>(R.id.addAnnouncementButton)
+        addAnnouncementButton?.setOnClickListener { showAddAnnouncementDialog() }
+
         enforceAdminSecurity()
         tripAdapter.onEditTripListener = object : TripAdminAdapter.OnEditTripListener {
             override fun onEditTrip(trip: TripAdmin) {
                 showEditTripTitleDialog(trip)
             }
         }
-        btnBulkEditTitles = Button(requireContext()).apply {
-            text = "Bulk Edit Trip Titles"
-            setOnClickListener { showBulkEditTitlesDialog() }
-        }
+        
         // Add sample users button
         val btnAddSampleUsers = Button(requireContext()).apply {
             text = "Add Sample Users"
             setOnClickListener { addSampleUsers() }
         }
-        // Find the LinearLayout inside the ScrollView and add the buttons at the top
-        val container = view.findViewById<LinearLayout>(R.id.admin_dashboard_linear_layout)
-        container?.addView(btnBulkEditTitles, 0)
-        container?.addView(btnAddSampleUsers, 1)
+        
+        // Find the main container and add the sample users button
+        val mainContainer = view.findViewById<LinearLayout>(R.id.admin_dashboard_linear_layout)
+        mainContainer?.addView(btnAddSampleUsers, 0)
+        
         ensureAdminUserExists()
         migrateTripTitlesIfNeeded()
         fixTripsDataIfNeeded()
@@ -325,175 +316,19 @@ class AdminDashboardFragment : Fragment() {
         tvTotalBookings = view.findViewById(R.id.tvTotalBookings)
         tvTotalRevenue = view.findViewById(R.id.tvTotalRevenue)
         tvTotalTrips = view.findViewById(R.id.tvTotalTrips)
-        chartBookings = view.findViewById(R.id.chartBookings)
-        chartRevenue = view.findViewById(R.id.chartRevenue)
-        loadingLayout = view.findViewById(R.id.loadingLayout)
-        emptyLayout = view.findViewById(R.id.emptyLayout)
+        
+        // Initialize charts if they exist in the layout
+        // Charts removed from new Material 3 layout
     }
 
     private fun setupCharts() {
-        // Setup Bookings Chart
-        chartBookings.apply {
-            description.isEnabled = false
-            legend.isEnabled = false
-            setTouchEnabled(true)
-            setScaleEnabled(false)
-            setPinchZoom(false)
-            
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false)
-                valueFormatter = DateAxisFormatter(emptyList()) // Initialize with empty list
-            }
-            
-            axisLeft.apply {
-                setDrawGridLines(true)
-                axisMinimum = 0f
-            }
-            
-            axisRight.isEnabled = false
-        }
-
-        // Setup Revenue Chart
-        chartRevenue.apply {
-            description.isEnabled = false
-            legend.isEnabled = false
-            setTouchEnabled(true)
-            setScaleEnabled(false)
-            setPinchZoom(false)
-            
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false)
-                valueFormatter = DateAxisFormatter(emptyList()) // Initialize with empty list
-            }
-            
-            axisLeft.apply {
-                setDrawGridLines(true)
-                axisMinimum = 0f
-            }
-            
-            axisRight.isEnabled = false
-        }
-    }
-
-    private fun loadDashboardData() {
-        showLoading()
-        
-        // Load users count
-        usersRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                totalUsers = snapshot.childrenCount.toInt()
-                updateUI()
-            }
-            
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-
-        // Load trips count
-        tripsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                totalTrips = snapshot.childrenCount.toInt()
-                updateUI()
-            }
-            
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-
-        // Load bookings and revenue data
-        bookingsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                totalBookings = 0
-                totalRevenue = 0.0
-                bookingsData.clear()
-                revenueData.clear()
-
-                for (bookingSnapshot in snapshot.children) {
-                    // Only try to map if the node is a Map/object
-                    if (bookingSnapshot.value is Map<*, *>) {
-                        val booking = bookingSnapshot.getValue(com.Travelplannerfyp.travelplannerapp.models.Booking::class.java)
-                        booking?.let {
-                            totalBookings++
-                            // Parse price
-                            val price = it.totalAmount
-                            totalRevenue += price
-                            // Get booking date for charts
-                            val bookingDate = it.createdAt
-                            val dateKey = formatDateForChart(bookingDate)
-                            bookingsData[dateKey] = (bookingsData[dateKey] ?: 0) + 1
-                            revenueData[dateKey] = (revenueData[dateKey] ?: 0.0) + price
-                        }
-                    }
-                }
-
-                updateCharts()
-                updateUI()
-            }
-            
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-    }
-
-    private fun updateUI() {
-        tvTotalUsers.text = totalUsers.toString()
-        tvTotalBookings.text = totalBookings.toString()
-        tvTotalRevenue.text = CurrencyUtils.formatPrice(totalRevenue)
-        tvTotalTrips.text = totalTrips.toString()
-
-        // Hide loading and show content if we have data
-        if (totalUsers > 0 || totalBookings > 0 || totalTrips > 0) {
-            hideLoading()
-        } else {
-            showEmpty()
-        }
+        // Charts removed from new Material 3 layout
+        // This method is kept for compatibility but does nothing
     }
 
     private fun updateCharts() {
-        // Update Bookings Chart
-        sortedBookingDateKeys = bookingsData.keys.sorted()
-        val bookingsEntries = sortedBookingDateKeys.mapIndexed { index, key ->
-            Entry(index.toFloat(), bookingsData[key]?.toFloat() ?: 0f)
-        }
-
-        if (bookingsEntries.isNotEmpty()) {
-            val bookingsDataSet = LineDataSet(bookingsEntries, "Bookings").apply {
-                color = Color.parseColor("#2196F3")
-                setCircleColor(Color.parseColor("#2196F3"))
-                lineWidth = 2f
-                circleRadius = 4f
-                setDrawValues(false)
-            }
-
-            chartBookings.data = LineData(bookingsDataSet)
-            chartBookings.xAxis.valueFormatter = DateAxisFormatter(sortedBookingDateKeys)
-            chartBookings.invalidate()
-        }
-
-        // Update Revenue Chart
-        sortedRevenueDateKeys = revenueData.keys.sorted()
-        val revenueEntries = sortedRevenueDateKeys.mapIndexed { index, key ->
-            Entry(index.toFloat(), revenueData[key]?.toFloat() ?: 0f)
-        }
-
-        if (revenueEntries.isNotEmpty()) {
-            val revenueDataSet = LineDataSet(revenueEntries, "Revenue").apply {
-                color = Color.parseColor("#4CAF50")
-                setCircleColor(Color.parseColor("#4CAF50"))
-                lineWidth = 2f
-                circleRadius = 4f
-                setDrawValues(false)
-            }
-
-            chartRevenue.data = LineData(revenueDataSet)
-            chartRevenue.xAxis.valueFormatter = DateAxisFormatter(sortedRevenueDateKeys)
-            chartRevenue.invalidate()
-        }
+        // Charts removed from new Material 3 layout
+        // This method is kept for compatibility but does nothing
     }
 
     private fun formatDateForChart(timestamp: Long): String {
@@ -976,5 +811,65 @@ class AdminDashboardFragment : Fragment() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun loadDashboardData() {
+        // Load users count
+        usersRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                totalUsers = snapshot.childrenCount.toInt()
+                updateUI()
+            }
+            
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AdminDashboard", "Failed to load users: ${error.message}")
+            }
+        })
+
+        // Load trips count
+        tripsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                totalTrips = snapshot.childrenCount.toInt()
+                updateUI()
+            }
+            
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AdminDashboard", "Failed to load trips: ${error.message}")
+            }
+        })
+
+        // Load bookings and revenue data
+        bookingsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                totalBookings = 0
+                totalRevenue = 0.0
+
+                for (bookingSnapshot in snapshot.children) {
+                    // Only try to map if the node is a Map/object
+                    if (bookingSnapshot.value is Map<*, *>) {
+                        val booking = bookingSnapshot.getValue(com.Travelplannerfyp.travelplannerapp.models.Booking::class.java)
+                        booking?.let {
+                            totalBookings++
+                            // Parse price
+                            val price = it.totalAmount
+                            totalRevenue += price
+                        }
+                    }
+                }
+
+                updateUI()
+            }
+            
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("AdminDashboard", "Failed to load bookings: ${error.message}")
+            }
+        })
+    }
+
+    private fun updateUI() {
+        tvTotalUsers?.text = totalUsers.toString()
+        tvTotalBookings?.text = totalBookings.toString()
+        tvTotalRevenue?.text = CurrencyUtils.formatPrice(totalRevenue)
+        tvTotalTrips?.text = totalTrips.toString()
     }
 } 
