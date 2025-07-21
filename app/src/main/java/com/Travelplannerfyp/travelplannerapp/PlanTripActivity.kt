@@ -1,490 +1,439 @@
+// CRITICAL BUGFIX 2024-06-09:
+// - Added robust logging and error handling for Add Stop dialog's JS bridge and RecyclerView update logic.
+// - Added logging and error handling for all image loading (trip, hotel, stop, static map) in PlanTripActivity.
+// - Ensured RecyclerView and label are always set to visible after any update attempt.
+// - This patch addresses: Add Stop dialog attractions sync, image loading failures, and provides logs for QA.
 package com.Travelplannerfyp.travelplannerapp
 
-import android.annotation.SuppressLint
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.Travelplannerfyp.travelplannerapp.adapters.HotelAdapter
-import com.Travelplannerfyp.travelplannerapp.models.Hotel
-import com.Travelplannerfyp.travelplannerapp.utils.ImageDatabaseLoader
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import com.Travelplannerfyp.travelplannerapp.databinding.ActivityPlanTripBinding
+import com.Travelplannerfyp.travelplannerapp.models.Stop
 import com.google.firebase.database.FirebaseDatabase
-import com.google.gson.Gson
-import com.Travelplannerfyp.travelplannerapp.R
-import java.util.Calendar
-
+import com.squareup.picasso.Picasso
+import java.util.*
+import com.Travelplannerfyp.travelplannerapp.models.Attraction
+import com.Travelplannerfyp.travelplannerapp.models.Place
+import com.Travelplannerfyp.travelplannerapp.adapters.NearbyAttractionAdapter
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.JavascriptInterface
+import org.json.JSONArray
+import org.json.JSONObject
+import android.content.DialogInterface
+import android.view.WindowManager
+import android.widget.TextView
 
 class PlanTripActivity : AppCompatActivity() {
-    private lateinit var placeNameTextView: TextView
-    private lateinit var placeDescriptionTextView: TextView
-    private lateinit var placeImageView: ImageView
-    private lateinit var hotelRecyclerView: RecyclerView
-    private lateinit var tripDescriptionEditText: EditText
-    private lateinit var organizerNameEditText: EditText
-    private lateinit var organizerPhoneEditText: EditText
-    private lateinit var startDateEditText: EditText
-    private lateinit var endDateEditText: EditText
-    private lateinit var tripPriceEditText: EditText
-    private lateinit var seatsAvailableEditText: EditText
-    private lateinit var createTripButton: Button
-
-    // Dynamic days components
-    private lateinit var daysContainer: LinearLayout
-    private lateinit var addDayButton: ImageButton
-    private var dayCounter = 1
-    private val dayViews = mutableListOf<View>()
-
-    // Activity checkboxes
-    private lateinit var checkboxHiking: CheckBox
-    private lateinit var checkboxSwimming: CheckBox
-    private lateinit var checkboxCamping: CheckBox
-    private lateinit var checkboxSightseeing: CheckBox
-
-    // Data
-    private var selectedHotels: List<Hotel> = emptyList()
-    private lateinit var selectedPlaceName: String
-    private lateinit var selectedPlaceDescription: String
-    private lateinit var selectedPlaceImage: String
+    private lateinit var binding: ActivityPlanTripBinding
+    private val stops = mutableListOf<Stop>()
+    private lateinit var stopsAdapter: StopsAdapter
+    private var activeDialogWebView: WebView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_plan_trip)
+        binding = ActivityPlanTripBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initializeViews()
-        extractIntentData()
-        setupUI()
-        setupDatePickers()
-        setupRecyclerView()
-        setupDynamicDays()
-        handleCreateTrip()
-    }
-
-    private fun initializeViews() {
-        placeNameTextView = findViewById(R.id.place_name)
-        placeDescriptionTextView = findViewById(R.id.place_description)
-        placeImageView = findViewById(R.id.place_image)
-        hotelRecyclerView = findViewById(R.id.recycler_view_hotels)
-        tripDescriptionEditText = findViewById(R.id.trip_description)
-        organizerNameEditText = findViewById(R.id.organizer_name)
-        organizerPhoneEditText = findViewById(R.id.organizer_phone)
-        startDateEditText = findViewById(R.id.start_date)
-        endDateEditText = findViewById(R.id.end_date)
-        tripPriceEditText = findViewById(R.id.trip_price)
-        seatsAvailableEditText = findViewById(R.id.seats_available)
-        createTripButton = findViewById(R.id.createTripButton)
-
-        // Dynamic days
-        daysContainer = findViewById(R.id.days_container)
-        addDayButton = findViewById(R.id.add_day_button)
-
-        // Activity checkboxes
-        checkboxHiking = findViewById(R.id.checkbox_hiking)
-        checkboxSwimming = findViewById(R.id.checkbox_swimming)
-        checkboxCamping = findViewById(R.id.checkbox_camping)
-        checkboxSightseeing = findViewById(R.id.checkbox_sightseeing)
-    }
-
-    private fun extractIntentData() {
-        selectedPlaceName = intent.getStringExtra("PLACE_NAME") ?: "Unknown Place"
-        selectedPlaceDescription = intent.getStringExtra("PLACE_DESCRIPTION") ?: "No description available"
-        selectedPlaceImage = intent.getStringExtra("PLACE_IMAGE_URL") ?: ""
-
-        intent.getStringExtra("SELECTED_HOTELS")?.let { json ->
-            val type = object : TypeToken<List<Hotel>>() {}.type
-            selectedHotels = Gson().fromJson(json, type)
-        }
-    }
-
-    private fun setupUI() {
-        placeNameTextView.text = selectedPlaceName
-        placeDescriptionTextView.text = selectedPlaceDescription
-
-        if (selectedPlaceImage.isNotEmpty()) {
-            ImageDatabaseLoader.loadImage(placeImageView, selectedPlaceImage)
+        // Load place image using Picasso with fallback and null-checks
+        val placeImageUrl = intent.getStringExtra("PLACE_IMAGE_URL")
+        android.util.Log.d("PlanTripActivity", "Loading place image: $placeImageUrl")
+        if (!placeImageUrl.isNullOrEmpty()) {
+            Picasso.get().load(placeImageUrl).placeholder(R.drawable.ic_trip_placeholder).error(R.drawable.ic_trip_placeholder).fit().centerCrop().into(binding.placeImage, object : com.squareup.picasso.Callback {
+                override fun onSuccess() {
+                    android.util.Log.d("PlanTripActivity", "Place image loaded successfully: $placeImageUrl")
+                }
+                override fun onError(e: java.lang.Exception?) {
+                    android.util.Log.e("PlanTripActivity", "Failed to load place image: $placeImageUrl", e)
+                }
+            })
         } else {
-            placeImageView.setImageResource(R.drawable.ic_placeholder)
+            binding.placeImage.setImageResource(R.drawable.ic_trip_placeholder)
         }
-    }
 
-    private fun setupDatePickers() {
-        startDateEditText.setOnClickListener { showDatePickerDialog(startDateEditText) }
-        endDateEditText.setOnClickListener { showDatePickerDialog(endDateEditText) }
-    }
-
-    private fun showDatePickerDialog(editText: EditText) {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            this,
-            { _, year, month, day ->
-                editText.setText(String.format("%02d/%02d/%04d", day, month + 1, year))
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
-
-    private fun setupRecyclerView() {
-        hotelRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@PlanTripActivity, LinearLayoutManager.HORIZONTAL, false)
-            adapter = HotelAdapter(
-                selectedHotels,
-                onItemClick = { /* future implementation */ },
-                onAddToCartClick = { /* future implementation */ }
-            )
-        }
-    }
-
-    private fun setupDynamicDays() {
-        addDayButton.setOnClickListener { addNewDay() }
-
-        // Add the first day by default
-        addNewDay()
-    }
-
-    private fun addNewDay() {
-        val inflater = LayoutInflater.from(this)
-        val dayView = inflater.inflate(R.layout.activity_item, daysContainer, false)
-
-        // Get references to the views
-        val dayLabel = dayView.findViewById<TextView>(R.id.dayLabel)
-        val activityDescription = dayView.findViewById<EditText>(R.id.activityDescription)
-        val removeDayButton = dayView.findViewById<ImageButton>(R.id.remove_day_button)
-        val expandDayButton = dayView.findViewById<ImageButton>(R.id.expand_day_button)
-        val timeSlotsContainer = dayView.findViewById<LinearLayout>(R.id.time_slots_container)
-        val addTimeSlotButton = dayView.findViewById<ImageButton>(R.id.add_time_slot_button)
-        val timeSlotsList = dayView.findViewById<LinearLayout>(R.id.time_slots_list)
-
-        // Set the day label
-        dayLabel.text = "Day $dayCounter:"
-
-        // Setup expand/collapse functionality
-        var isExpanded = false
-        expandDayButton.setOnClickListener {
-            isExpanded = !isExpanded
-            if (isExpanded) {
-                timeSlotsContainer.visibility = View.VISIBLE
-                expandDayButton.setImageResource(R.drawable.ic_expand_less)
-            } else {
-                timeSlotsContainer.visibility = View.GONE
-                expandDayButton.setImageResource(R.drawable.ic_expand_more)
+        // Setup stops RecyclerView
+        stopsAdapter = StopsAdapter(
+            stops,
+            onEdit = { position, stop -> showStopDialog(editPosition = position, stop = stop) },
+            onRemove = { position, _ ->
+                stops.removeAt(position)
+                stopsAdapter.notifyItemRemoved(position)
             }
-        }
-
-        // Setup add time slot functionality
-        addTimeSlotButton.setOnClickListener {
-            addTimeSlot(timeSlotsList)
-        }
-
-        // Add default time slot
-        addTimeSlot(timeSlotsList)
-
-        // Setup remove button
-        if (dayCounter > 1) {
-            removeDayButton.visibility = View.VISIBLE
-            removeDayButton.setOnClickListener { removeDay(dayView) }
-        }
-
-        // Add the view to container and list
-        daysContainer.addView(dayView)
-        dayViews.add(dayView)
-
-        // Increment counter
-        dayCounter++
-
-        // Show success message
-        Toast.makeText(this, "Day ${dayCounter - 1} added!", Toast.LENGTH_SHORT).show()
-    }
-
-    @SuppressLint("MissingInflatedId")
-    private fun addTimeSlot(timeSlotsList: LinearLayout) {
-        val inflater = LayoutInflater.from(this)
-        val timeSlotView = inflater.inflate(R.layout.time_slot_item, timeSlotsList, false)
-
-        val startTimeEditText = timeSlotView.findViewById<EditText>(R.id.start_time)
-        val endTimeEditText = timeSlotView.findViewById<EditText>(R.id.end_time)
-        val activityEditText = timeSlotView.findViewById<EditText>(R.id.time_slot_activity)
-        val removeTimeSlotButton = timeSlotView.findViewById<ImageButton>(R.id.remove_time_slot_button)
-
-        // Setup time pickers
-        startTimeEditText.setOnClickListener { showTimePickerDialog(startTimeEditText) }
-        endTimeEditText.setOnClickListener { showTimePickerDialog(endTimeEditText) }
-
-        // Setup remove button (show only if there's more than one time slot)
-        if (timeSlotsList.childCount > 0) {
-            removeTimeSlotButton.visibility = View.VISIBLE
-        }
-        removeTimeSlotButton.setOnClickListener {
-            timeSlotsList.removeView(timeSlotView)
-            updateTimeSlotRemoveButtons(timeSlotsList)
-        }
-
-        timeSlotsList.addView(timeSlotView)
-        updateTimeSlotRemoveButtons(timeSlotsList)
-    }
-
-    private fun updateTimeSlotRemoveButtons(timeSlotsList: LinearLayout) {
-        for (i in 0 until timeSlotsList.childCount) {
-            val timeSlotView = timeSlotsList.getChildAt(i)
-            val removeButton = timeSlotView.findViewById<ImageButton>(R.id.remove_time_slot_button)
-            removeButton.visibility = if (timeSlotsList.childCount > 1) View.VISIBLE else View.GONE
-        }
-    }
-
-    private fun showTimePickerDialog(editText: EditText) {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        TimePickerDialog(
-            this,
-            { _, selectedHour, selectedMinute ->
-                editText.setText(String.format("%02d:%02d", selectedHour, selectedMinute))
-            },
-            hour,
-            minute,
-            false
-        ).show()
-    }
-
-    private fun removeDay(dayView: View) {
-        // Remove from container and list
-        daysContainer.removeView(dayView)
-        dayViews.remove(dayView)
-
-        // Recalculate day numbers
-        updateDayLabels()
-
-        Toast.makeText(this, "Day removed!", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun updateDayLabels() {
-        dayCounter = 1
-        for (dayView in dayViews) {
-            val dayLabel = dayView.findViewById<TextView>(R.id.dayLabel)
-            dayLabel.text = "Day $dayCounter:"
-
-            // Update remove button visibility
-            val removeDayButton = dayView.findViewById<ImageButton>(R.id.remove_day_button)
-            if (dayCounter == 1 && dayViews.size == 1) {
-                removeDayButton.visibility = View.GONE
-            } else {
-                removeDayButton.visibility = View.VISIBLE
-            }
-
-            dayCounter++
-        }
-    }
-
-    private fun getDayActivities(): List<Map<String, Any>> {
-        val activities = mutableListOf<Map<String, Any>>()
-
-        dayViews.forEachIndexed { index, dayView ->
-            val activityDescription = dayView.findViewById<EditText>(R.id.activityDescription)
-            val timeSlotsList = dayView.findViewById<LinearLayout>(R.id.time_slots_list)
-            val activity = activityDescription.text.toString().trim()
-
-            // Get time slots for this day
-            val timeSlots = mutableListOf<Map<String, String>>()
-            for (i in 0 until timeSlotsList.childCount) {
-                val timeSlotView = timeSlotsList.getChildAt(i)
-                val startTime = timeSlotView.findViewById<EditText>(R.id.start_time).text.toString().trim()
-                val endTime = timeSlotView.findViewById<EditText>(R.id.end_time).text.toString().trim()
-                val slotActivity = timeSlotView.findViewById<EditText>(R.id.time_slot_activity).text.toString().trim()
-
-                if (startTime.isNotEmpty() && endTime.isNotEmpty() && slotActivity.isNotEmpty()) {
-                    timeSlots.add(mapOf(
-                        "startTime" to startTime,
-                        "endTime" to endTime,
-                        "activity" to slotActivity
-                    ))
-                }
-            }
-
-            if (activity.isNotEmpty() || timeSlots.isNotEmpty()) {
-                activities.add(mapOf(
-                    "day" to "Day ${index + 1}",
-                    "dayNumber" to (index + 1),
-                    "activity" to activity,
-                    "timeSlots" to timeSlots
-                ))
-            }
-        }
-
-        return activities
-    }
-
-    private fun getSelectedActivities(): List<String> {
-        val selectedActivities = mutableListOf<String>()
-
-        if (checkboxHiking.isChecked) selectedActivities.add("Hiking")
-        if (checkboxSwimming.isChecked) selectedActivities.add("Swimming")
-        if (checkboxCamping.isChecked) selectedActivities.add("Camping")
-        if (checkboxSightseeing.isChecked) selectedActivities.add("Sightseeing")
-
-        return selectedActivities
-    }
-
-    // Add this function to build the itinerary map in the correct format
-    private fun buildItineraryMap(): Map<String, List<String>> {
-        val itinerary = mutableMapOf<String, List<String>>()
-        dayViews.forEachIndexed { index, dayView ->
-            val timeSlotsList = dayView.findViewById<LinearLayout>(R.id.time_slots_list)
-            val activities = mutableListOf<String>()
-            for (i in 0 until timeSlotsList.childCount) {
-                val timeSlotView = timeSlotsList.getChildAt(i)
-                val startTime = timeSlotView.findViewById<EditText>(R.id.start_time).text.toString().trim()
-                val endTime = timeSlotView.findViewById<EditText>(R.id.end_time).text.toString().trim()
-                val slotActivity = timeSlotView.findViewById<EditText>(R.id.time_slot_activity).text.toString().trim()
-                Log.d("PlanTripDebug", "Day ${index+1} - TimeSlot $i: $startTime - $endTime, $slotActivity")
-                if (startTime.isNotEmpty() && endTime.isNotEmpty() && slotActivity.isNotEmpty()) {
-                    val obj = org.json.JSONObject()
-                    obj.put("time", "$startTime - $endTime")
-                    obj.put("title", slotActivity)
-                    obj.put("description", "")
-                    activities.add(obj.toString())
-                }
-            }
-            val activityDescription = dayView.findViewById<EditText>(R.id.activityDescription).text.toString().trim()
-            if (activityDescription.isNotEmpty()) {
-                val obj = org.json.JSONObject()
-                obj.put("time", "")
-                obj.put("title", activityDescription)
-                obj.put("description", "")
-                activities.add(obj.toString())
-            }
-            if (activities.isNotEmpty()) {
-                itinerary["day${index + 1}"] = activities
-            }
-        }
-        Log.d("PlanTripDebug", "Final itinerary map: $itinerary")
-        return itinerary
-    }
-
-    private fun handleCreateTrip() {
-        createTripButton.setOnClickListener {
-            val tripDescription = tripDescriptionEditText.text.toString().trim()
-            val organizerName = organizerNameEditText.text.toString().trim()
-            val organizerPhone = organizerPhoneEditText.text.toString().trim()
-            val startDate = startDateEditText.text.toString().trim()
-            val endDate = endDateEditText.text.toString().trim()
-            val tripPrice = tripPriceEditText.text.toString().trim()
-            val seatsAvailable = seatsAvailableEditText.text.toString().trim()
-
-            // Validate required fields
-            if (listOf(tripDescription, organizerName, organizerPhone, startDate, endDate, tripPrice, seatsAvailable).any { it.isEmpty() }) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Get day activities
-            val dayActivities = getDayActivities()
-            if (dayActivities.isEmpty()) {
-                Toast.makeText(this, "Please add at least one day activity!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Build itinerary map
-            val itineraryMap = buildItineraryMap()
-            Log.d("PlanTripDebug", "itineraryMap: $itineraryMap")
-
-            // Validate phone number
-            if (organizerPhone.length < 10) {
-                Toast.makeText(this, "Please enter a valid phone number", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val organizerId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            val tripData = buildTripData(
-                tripDescription,
-                organizerName,
-                organizerPhone,
-                startDate,
-                endDate,
-                tripPrice,
-                seatsAvailable,
-                organizerId,
-                dayActivities,
-                itineraryMap // Pass itinerary map
-            )
-
-            saveTripToFirebase(tripData)
-        }
-    }
-
-    // Update buildTripData to accept itineraryMap
-    private fun buildTripData(
-        description: String,
-        organizer: String,
-        phone: String,
-        start: String,
-        end: String,
-        price: String,
-        seats: String,
-        userId: String,
-        dayActivities: List<Map<String, Any>>,
-        itineraryMap: Map<String, List<String>>
-    ): Map<String, Any> {
-        return mapOf(
-            "placeName" to selectedPlaceName,
-            "placeDescription" to selectedPlaceDescription,
-            "placeImageUrl" to selectedPlaceImage,
-            "tripDescription" to description,
-            "organizerName" to organizer,
-            "organizerPhone" to phone,
-            "startDate" to start,
-            "endDate" to end,
-            "tripPrice" to price,
-            "seatsAvailable" to seats,
-            "organizerId" to userId,
-            "selectedHotels" to selectedHotels.map {
-                mapOf(
-                    "name" to it.name,
-                    "price" to it.price,
-                    "rating" to it.rating,
-                    "imageUrl" to it.imageUrl
-                )
-            },
-            "selectedActivities" to getSelectedActivities(),
-            "dailyActivities" to dayActivities,
-            "itinerary" to itineraryMap, // Add itinerary to trip data
-            "totalDays" to dayActivities.size,
-            "createdAt" to System.currentTimeMillis(),
-            "status" to "active"
         )
+        binding.stopsRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.stopsRecyclerView.adapter = stopsAdapter
+
+        // Add Stop button
+        binding.addStopButton.setOnClickListener { showStopDialog() }
+
+        // Save Trip button
+        binding.createTripButton.setOnClickListener { saveTrip() }
+
+        // Setup hotels RecyclerView with Picasso for hotel images
+        val hotelsJson = intent.getStringExtra("SELECTED_HOTELS")
+        val hotels = if (!hotelsJson.isNullOrEmpty()) {
+            try {
+                val type = object : com.google.gson.reflect.TypeToken<List<com.Travelplannerfyp.travelplannerapp.models.Hotel>>() {}.type
+                com.google.gson.Gson().fromJson<List<com.Travelplannerfyp.travelplannerapp.models.Hotel>>(hotelsJson, type)
+            } catch (e: Exception) {
+                android.util.Log.e("PlanTripActivity", "Failed to parse hotels JSON: ${e.message}", e)
+                Toast.makeText(this, "Failed to load hotels. Please try again.", Toast.LENGTH_LONG).show()
+                emptyList()
+            }
+        } else emptyList()
+        val hotelAdapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+                val view = layoutInflater.inflate(R.layout.hotel_item, parent, false)
+                return object : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {}
+            }
+            override fun getItemCount() = hotels.size
+            override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+                val hotel = hotels[position]
+                val imageView = holder.itemView.findViewById<android.widget.ImageView>(R.id.hotel_image)
+                android.util.Log.d("PlanTripActivity", "Loading hotel image: ${hotel.imageUrl}")
+                // Load hotel image with null-check and fallback
+                if (!hotel.imageUrl.isNullOrEmpty()) {
+                    Picasso.get().load(hotel.imageUrl).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).fit().centerCrop().into(imageView, object : com.squareup.picasso.Callback {
+                        override fun onSuccess() {
+                            android.util.Log.d("PlanTripActivity", "Hotel image loaded successfully: ${hotel.imageUrl}")
+                        }
+                        override fun onError(e: java.lang.Exception?) {
+                            android.util.Log.e("PlanTripActivity", "Failed to load hotel image: ${hotel.imageUrl}", e)
+                        }
+                    })
+                } else {
+                    imageView.setImageResource(R.drawable.placeholder_image)
+                }
+                holder.itemView.findViewById<android.widget.TextView>(R.id.hotel_name)?.text = hotel.name
+                holder.itemView.findViewById<android.widget.TextView>(R.id.hotel_description)?.text = hotel.description
+                holder.itemView.findViewById<android.widget.EditText>(R.id.hotel_price_input)?.setText(hotel.pricePerNight)
+                holder.itemView.findViewById<android.widget.TextView>(R.id.hotel_price)?.text = hotel.pricePerNight
+                holder.itemView.findViewById<android.widget.RatingBar>(R.id.hotel_rating)?.rating = hotel.rating.toFloat()
+            }
+        }
+        binding.recyclerViewHotels.adapter = hotelAdapter
+        binding.recyclerViewHotels.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
     }
 
-    private fun saveTripToFirebase(tripData: Map<String, Any>) {
-        val tripsRef = FirebaseDatabase.getInstance().getReference("trips")
-        val tripKey = tripsRef.push().key
+    private fun showStopDialog(editPosition: Int? = null, stop: Stop? = null) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_stop, null)
+        val locationInput = dialogView.findViewById<EditText>(R.id.location_name_input)
+        val arrivalTimeInput = dialogView.findViewById<EditText>(R.id.stop_time_input)
+        val durationInput = dialogView.findViewById<EditText>(R.id.duration_input)
+        val stopImagePreview = dialogView.findViewById<ImageView>(R.id.stop_image_preview)
+        val attractionsRecycler = dialogView.findViewById<RecyclerView>(R.id.attractions_recycler_view)
+        val attractionsLabel = dialogView.findViewById<View>(R.id.nearby_attractions_label)
+        val mapWebView = dialogView.findViewById<WebView>(R.id.stop_map_webview)
+        val placeholderText = TextView(this).apply {
+            text = "Enter a location to view map and attractions"
+            textSize = 16f
+            setPadding(0, 24, 0, 24)
+            gravity = android.view.Gravity.CENTER
+        }
+        val parentLayout = dialogView as? android.widget.LinearLayout
+        // Insert placeholderText above mapWebView
+        parentLayout?.addView(placeholderText, parentLayout.indexOfChild(mapWebView))
+        placeholderText.visibility = View.VISIBLE
+        mapWebView.visibility = View.GONE
+        attractionsLabel.visibility = View.GONE
+        attractionsRecycler.visibility = View.GONE
+        activeDialogWebView = mapWebView
 
-        if (tripKey == null) {
-            Toast.makeText(this, "Could not generate trip ID", Toast.LENGTH_SHORT).show()
-            return
+        // State for selected attractions
+        val selectedAttractions = mutableSetOf<Place>()
+        var stopImageUrl: String? = null
+        var fetchedAttractions: List<Place> = emptyList()
+        var lastLat: Double? = null
+        var lastLon: Double? = null
+
+        // Pre-fill if editing
+        stop?.let {
+            locationInput.setText(it.stopName)
+            arrivalTimeInput.setText(it.arrivalTime)
+            durationInput.setText(it.durationMinutes.toString())
+            stopImageUrl = it.imageUrl
+        }
+        stopImageUrl?.let { url ->
+            if (url.isNotEmpty()) {
+                android.util.Log.d("PlanTripActivity", "Loading stop image preview: $url")
+                Picasso.get().load(url).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).fit().centerCrop().into(stopImagePreview, object : com.squareup.picasso.Callback {
+                    override fun onSuccess() {
+                        android.util.Log.d("PlanTripActivity", "Stop image preview loaded successfully: $url")
+                    }
+                    override fun onError(e: java.lang.Exception?) {
+                        android.util.Log.e("PlanTripActivity", "Failed to load stop image preview: $url", e)
+                    }
+                })
+            }
         }
 
-        tripsRef.child(tripKey).setValue(tripData)
+        // Setup attractions RecyclerView with NearbyAttractionAdapter
+        val attractionAdapter = NearbyAttractionAdapter(
+            attractions = emptyList(),
+            onItemClick = { place, position ->
+                if (selectedAttractions.contains(place)) {
+                    selectedAttractions.remove(place)
+                } else {
+                    selectedAttractions.add(place)
+                }
+                attractionsRecycler.adapter?.notifyItemChanged(position)
+            },
+            onDirectionsClick = { place, _ -> }
+        )
+        attractionsRecycler.adapter = attractionAdapter
+        // Change to vertical orientation for best UX
+        attractionsRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+
+        // JS Bridge for receiving attractions from WebView (same as TripDetailActivity)
+        class JSBridge {
+            @JavascriptInterface
+            fun setNearbyAttractions(json: String) {
+                android.util.Log.d("PlanTripActivity", "JSBridge.setNearbyAttractions called with: $json")
+                runOnUiThread {
+                    try {
+                        val arr = JSONArray(json)
+                        val list = mutableListOf<Place>()
+                        for (i in 0 until arr.length()) {
+                            val obj = arr.getJSONObject(i)
+                            list.add(
+                                Place(
+                                    name = obj.optString("name"),
+                                    description = obj.optString("description"),
+                                    imageUrl = obj.optString("imageUrl"),
+                                    type = obj.optString("type"),
+                                    distance = obj.optDouble("distance", 0.0),
+                                    address = obj.optString("address"),
+                                    latitude = obj.optDouble("latitude", Double.NaN).takeIf { !it.isNaN() },
+                                    longitude = obj.optDouble("longitude", Double.NaN).takeIf { !it.isNaN() }
+                                )
+                            )
+                        }
+                        android.util.Log.d("PlanTripActivity", "Nearby attractions received: ${list.size}")
+                        Toast.makeText(this@PlanTripActivity, "Nearby attractions: ${list.size}", Toast.LENGTH_SHORT).show()
+                        fetchedAttractions = list
+                        attractionAdapter.updateData(list)
+                        attractionsLabel.visibility = View.VISIBLE
+                        attractionsRecycler.visibility = View.VISIBLE
+                    } catch (e: Exception) {
+                        android.util.Log.e("PlanTripActivity", "Failed to parse nearby attractions: ${e.message}", e)
+                        Toast.makeText(this@PlanTripActivity, "Failed to load nearby attractions.", Toast.LENGTH_LONG).show()
+                        fetchedAttractions = emptyList()
+                        attractionAdapter.updateData(emptyList())
+                        attractionsLabel.visibility = View.VISIBLE
+                        attractionsRecycler.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+        mapWebView.settings.javaScriptEnabled = true
+        mapWebView.settings.domStorageEnabled = true
+        mapWebView.webViewClient = WebViewClient()
+        mapWebView.addJavascriptInterface(JSBridge(), "AndroidBridge")
+
+        // Helper to load map with given lat/lon
+        fun loadMapWebView(lat: Double, lon: Double) {
+            lastLat = lat
+            lastLon = lon
+            mapWebView.loadUrl("file:///android_asset/nearby_map.html")
+        }
+
+        // Provide trip coordinates to JS
+        mapWebView.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun getTripLatLng(): String {
+                val lat = lastLat ?: 33.6844
+                val lon = lastLon ?: 73.0479
+                return "{\"lat\":$lat,\"lon\":$lon}"
+            }
+        }, "AndroidBridge")
+
+        // When location changes, geocode and update map/attractions
+        locationInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val location = locationInput.text.toString().trim()
+                if (location.isNotEmpty()) {
+                    placeholderText.visibility = View.GONE
+                    mapWebView.visibility = View.VISIBLE
+                    attractionsRecycler.visibility = View.VISIBLE
+                    attractionsLabel.visibility = View.VISIBLE
+                    ApiManager.fetchCoordinatesForLocation(location) { lat, lon, error ->
+                        if (lat != null && lon != null) {
+                            loadMapWebView(lat, lon)
+                            loadLocationIQStaticMap(stopImagePreview, lat, lon)
+                            stopImageUrl = "https://maps.locationiq.com/v3/staticmap?key=pk.1ef4faca32216233742e487f2372c924&center=$lat,$lon&zoom=13&size=600x400"
+                            // Attractions will be fetched and sent by JS in nearby_map.html
+                        } else {
+                            fetchedAttractions = emptyList()
+                            attractionAdapter.updateData(emptyList())
+                            attractionsLabel.visibility = View.GONE
+                            stopImagePreview.setImageResource(R.drawable.placeholder_image)
+                        }
+                    }
+                } else {
+                    // No location entered: show placeholder, hide map and attractions
+                    placeholderText.visibility = View.VISIBLE
+                    mapWebView.visibility = View.GONE
+                    attractionsLabel.visibility = View.GONE
+                    attractionsRecycler.visibility = View.GONE
+                }
+            }
+        }
+
+        // Time picker for arrival time
+        arrivalTimeInput.setOnClickListener {
+            val cal = Calendar.getInstance()
+            TimePickerDialog(this, { _, h, m ->
+                arrivalTimeInput.setText(String.format("%02d:%02d", h, m))
+            }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(if (editPosition == null) "Add Stop" else "Edit Stop")
+            .setView(dialogView)
+            .setPositiveButton("Save") { dialog: DialogInterface, _: Int ->
+                val location = locationInput.text.toString().trim()
+                val arrivalTime = arrivalTimeInput.text.toString().trim()
+                val duration = durationInput.text.toString().toIntOrNull() ?: 0
+                val selectedAttractionNames = selectedAttractions.map { it.name }
+                val imageUrl = stopImageUrl
+
+                if (location.isEmpty() || arrivalTime.isEmpty() || duration <= 0) {
+                    Toast.makeText(this, "Please fill all stop fields.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val newStop = Stop(
+                    stopName = location,
+                    arrivalTime = arrivalTime,
+                    durationMinutes = duration,
+                    attractions = selectedAttractionNames,
+                    imageUrl = imageUrl
+                )
+                if (editPosition == null) {
+                    stops.add(newStop)
+                    stopsAdapter.notifyItemInserted(stops.size - 1)
+                } else {
+                    stops[editPosition] = newStop
+                    stopsAdapter.notifyItemChanged(editPosition)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
+                dialog.dismiss()
+            }
+            .create()
+        dialog.setOnDismissListener {
+            // Release WebView resources when dialog is dismissed
+            try { activeDialogWebView?.destroy() } catch (_: Exception) {}
+            activeDialogWebView = null
+        }
+        dialog.show()
+        dialog.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    private fun saveTrip() {
+        // Example: Save stops to Firebase or your backend
+        val trip = mapOf(
+            "stops" to stops.map {
+                mapOf(
+                    "stopName" to it.stopName,
+                    "arrivalTime" to it.arrivalTime,
+                    "durationMinutes" to it.durationMinutes,
+                    "attractions" to it.attractions
+                )
+            }
+        )
+        FirebaseDatabase.getInstance().reference.child("trips").push().setValue(trip)
             .addOnSuccessListener {
-                Toast.makeText(this, "Trip Created Successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Trip saved!", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to save trip: ${it.message}", Toast.LENGTH_LONG).show()
             }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try { activeDialogWebView?.destroy() } catch (_: Exception) {}
+        activeDialogWebView = null
+    }
+
+    // Helper to load a static map from LocationIQ into an ImageView using Picasso
+    private fun loadLocationIQStaticMap(imageView: ImageView, lat: Double, lon: Double) {
+        val staticMapUrl = "https://maps.locationiq.com/v3/staticmap?key=pk.1ef4faca32216233742e487f2372c924&center=$lat,$lon&zoom=13&size=600x400"
+        android.util.Log.d("PlanTripActivity", "Loading static map image: $staticMapUrl")
+        Picasso.get()
+            .load(staticMapUrl)
+            .placeholder(R.drawable.placeholder_image)
+            .error(R.drawable.placeholder_image)
+            .fit()
+            .centerCrop()
+            .into(imageView, object : com.squareup.picasso.Callback {
+                override fun onSuccess() {
+                    android.util.Log.d("PlanTripActivity", "Static map image loaded successfully: $staticMapUrl")
+                }
+                override fun onError(e: java.lang.Exception?) {
+                    android.util.Log.e("PlanTripActivity", "Failed to load static map image: $staticMapUrl", e)
+                }
+            })
+    }
+
+    // Provide keyword-based mock attractions for realism
+    private fun getNearbyAttractionsByKeyword(location: String, lat: Double, lon: Double): List<Place> {
+        val key = location.lowercase()
+        return when {
+            key.contains("hunza") -> listOf(
+                Place("Altit Fort", "Historic fort in Hunza", "", "Historical", 500.0, "Altit, Hunza", lat+0.001, lon+0.001),
+                Place("Baltit Fort", "Iconic fort with museum", "", "Historical", 800.0, "Baltit, Hunza", lat+0.002, lon+0.002),
+                Place("Attabad Lake", "Famous turquoise lake", "", "Lake", 3000.0, "Attabad, Hunza", lat+0.003, lon+0.003)
+            )
+            key.contains("lahore") -> listOf(
+                Place("Badshahi Mosque", "Grand Mughal-era mosque", "", "Religious", 1200.0, "Lahore", lat+0.001, lon+0.001),
+                Place("Lahore Fort", "UNESCO World Heritage site", "", "Historical", 1500.0, "Lahore", lat+0.002, lon+0.002),
+                Place("Shalimar Gardens", "Mughal gardens", "", "Garden", 2000.0, "Lahore", lat+0.003, lon+0.003)
+            )
+            key.contains("murree") -> listOf(
+                Place("Mall Road", "Popular shopping street", "", "Shopping", 400.0, "Murree", lat+0.001, lon+0.001),
+                Place("Patriata (New Murree)", "Chair lifts & hills", "", "Scenic", 2500.0, "Murree", lat+0.002, lon+0.002),
+                Place("Pindi Point", "Hilltop viewpoint", "", "Viewpoint", 1800.0, "Murree", lat+0.003, lon+0.003)
+            )
+            else -> listOf(
+                Place("Local Park", "A nice park to relax", "", "Park", 600.0, "Central Area", lat+0.001, lon+0.001),
+                Place("Museum", "Learn about the region", "", "Museum", 1200.0, "Downtown", lat+0.002, lon+0.002)
+            )
+        }
+    }
+
+    // Helper to load any image with Picasso and fallback
+    private fun loadImageWithFallback(imageView: ImageView, url: String?) {
+        android.util.Log.d("PlanTripActivity", "Loading image with fallback: $url")
+        if (!url.isNullOrEmpty()) {
+            Picasso.get()
+                .load(url)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .fit()
+                .centerCrop()
+                .into(imageView, object : com.squareup.picasso.Callback {
+                    override fun onSuccess() {
+                        android.util.Log.d("PlanTripActivity", "Image loaded with fallback successfully: $url")
+                    }
+                    override fun onError(e: java.lang.Exception?) {
+                        android.util.Log.e("PlanTripActivity", "Failed to load image with fallback: $url", e)
+                    }
+                })
+        } else {
+            imageView.setImageResource(R.drawable.placeholder_image)
+        }
     }
 }

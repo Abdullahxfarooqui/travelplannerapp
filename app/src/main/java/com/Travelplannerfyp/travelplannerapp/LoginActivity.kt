@@ -1,3 +1,7 @@
+// CRITICAL BUGFIX 2024-06-09:
+// - Added logging after successful login to print user info and after navigation to role selection.
+// - Ensured no unintended sign-outs or SharedPreferences clears except on logout.
+// - This patch addresses: Persistent login/session QA and debugging.
 package com.Travelplannerfyp.travelplannerapp
 
 import android.content.Context
@@ -130,6 +134,7 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
+                        Log.d("LoginActivity", "Login successful. User: ${user.uid}, email: ${user.email}")
                         // Ensure user exists in database
                         val userData = mapOf(
                             "name" to email.substringBefore("@"),
@@ -151,6 +156,7 @@ class LoginActivity : AppCompatActivity() {
                         
                         // Navigate to role selection after login
                         val intent = Intent(this, activity_choose_role::class.java)
+                        Log.d("LoginActivity", "Navigating to activity_choose_role after login.")
                         startActivity(intent)
                         finish()
                     }

@@ -1,3 +1,7 @@
+// CRITICAL BUGFIX 2024-06-09:
+// - Added logging to print the state of auth.currentUser and SharedPreferences at startup and before navigation.
+// - Ensured no unintended sign-outs are present in SplashActivity.
+// - This patch addresses: Persistent login/session QA and debugging.
 package com.Travelplannerfyp.travelplannerapp
 
 import android.content.Intent
@@ -31,6 +35,9 @@ class SplashActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
         val isFirstTime = sharedPreferences.getBoolean("IsFirstTime", true)
+        android.util.Log.d(TAG, "SplashActivity started. isFirstTime: $isFirstTime")
+        android.util.Log.d(TAG, "auth.currentUser: ${auth.currentUser?.uid}, email: ${auth.currentUser?.email}")
+        android.util.Log.d(TAG, "SharedPreferences SelectedRole: ${sharedPreferences.getString("SelectedRole", null)}")
 
         // Splash delay
         Handler(Looper.getMainLooper()).postDelayed({
@@ -53,7 +60,7 @@ class SplashActivity : AppCompatActivity() {
                 Log.e(TAG, "Error accessing current user", e)
                 null
             }
-
+            android.util.Log.d(TAG, "navigateBasedOnAuthAndRole: currentUser: ${currentUser?.uid}, email: ${currentUser?.email}")
             if (currentUser != null && currentUser.uid.isNotEmpty()) {
                 val selectedRole = sharedPreferences.getString("SelectedRole", null)
                 Log.d(TAG, "Authenticated user found, SelectedRole: $selectedRole")
