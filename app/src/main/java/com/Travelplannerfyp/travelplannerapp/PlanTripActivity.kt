@@ -55,13 +55,25 @@ class PlanTripActivity : AppCompatActivity() {
                 }
                 override fun onError(e: java.lang.Exception?) {
                     android.util.Log.e("PlanTripActivity", "Failed to load place image: $placeImageUrl", e)
-                    // Set fallback image on error
-                    binding.placeImage.setImageResource(R.drawable.ic_trip_placeholder)
+                    // Try local fallback
+                    val localRes = getLocalResourceIdFromName(intent.getStringExtra("PLACE_NAME") ?: "")
+                    if (localRes != 0) {
+                        binding.placeImage.setImageResource(localRes)
+                        android.util.Log.d("PlanTripActivity", "Loaded local resource for trip image: $localRes")
+                    } else {
+                        binding.placeImage.setImageResource(R.drawable.ic_trip_placeholder)
+                    }
                 }
             })
         } else {
-            android.util.Log.d("PlanTripActivity", "Place image URL is null or empty, using placeholder")
-            binding.placeImage.setImageResource(R.drawable.ic_trip_placeholder)
+            android.util.Log.d("PlanTripActivity", "Place image URL is null or empty, using local fallback")
+            val localRes = getLocalResourceIdFromName(intent.getStringExtra("PLACE_NAME") ?: "")
+            if (localRes != 0) {
+                binding.placeImage.setImageResource(localRes)
+                android.util.Log.d("PlanTripActivity", "Loaded local resource for trip image: $localRes")
+            } else {
+                binding.placeImage.setImageResource(R.drawable.ic_trip_placeholder)
+            }
         }
 
         // Setup stops RecyclerView
@@ -112,13 +124,25 @@ class PlanTripActivity : AppCompatActivity() {
                         }
                         override fun onError(e: java.lang.Exception?) {
                             android.util.Log.e("PlanTripActivity", "Failed to load hotel image: ${hotel.imageUrl}", e)
-                            // Set fallback image on error
-                            imageView.setImageResource(R.drawable.placeholder_image)
+                            // Try local fallback
+                            val localRes = getLocalResourceIdFromName(hotel.name)
+                            if (localRes != 0) {
+                                imageView.setImageResource(localRes)
+                                android.util.Log.d("PlanTripActivity", "Loaded local resource for hotel image: $localRes")
+                            } else {
+                                imageView.setImageResource(R.drawable.placeholder_image)
+                            }
                         }
                     })
                 } else {
-                    android.util.Log.d("PlanTripActivity", "Hotel image URL is null or empty, using placeholder")
-                    imageView.setImageResource(R.drawable.placeholder_image)
+                    android.util.Log.d("PlanTripActivity", "Hotel image URL is null or empty, using local fallback")
+                    val localRes = getLocalResourceIdFromName(hotel.name)
+                    if (localRes != 0) {
+                        imageView.setImageResource(localRes)
+                        android.util.Log.d("PlanTripActivity", "Loaded local resource for hotel image: $localRes")
+                    } else {
+                        imageView.setImageResource(R.drawable.placeholder_image)
+                    }
                 }
                 holder.itemView.findViewById<android.widget.TextView>(R.id.hotel_name)?.text = hotel.name
                 holder.itemView.findViewById<android.widget.TextView>(R.id.hotel_description)?.text = hotel.description
@@ -386,5 +410,29 @@ class PlanTripActivity : AppCompatActivity() {
         // Implementation for saving trip
         Toast.makeText(this, "Trip saved successfully!", Toast.LENGTH_SHORT).show()
         finish()
+    }
+
+    private fun getLocalResourceIdFromName(name: String): Int {
+        return when (name.lowercase().replace(Regex("[^a-z0-9]+"), "_")) {
+            "hunza_valley", "hunza" -> R.drawable.hunza
+            "naran_kaghan", "naran" -> R.drawable.naran
+            "swat_valley", "swat" -> R.drawable.swat_valley_view
+            "murree", "murree_hills" -> R.drawable.murree
+            "skardu" -> R.drawable.skardu
+            "fairy_meadows" -> R.drawable.fairy_meadows
+            "lahore" -> R.drawable.lahore
+            "karimabad" -> R.drawable.karimabad
+            "ratti_gali_lake" -> R.drawable.rattigali
+            "ziarat" -> R.drawable.ziarat
+            "islamabad" -> R.drawable.islamabad
+            "balakot" -> R.drawable.balakot
+            "attabad_lake" -> R.drawable.attabad
+            "chitral" -> R.drawable.chitral
+            "khunjerab_pass" -> R.drawable.khunjerab
+            "gilgit" -> R.drawable.gilgit
+            "kotli" -> R.drawable.kotli
+            "neelum_valley" -> R.drawable.neelumvalley
+            else -> 0
+        }
     }
 }
