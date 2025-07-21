@@ -11,8 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
-import com.Travelplannerfyp.travelplannerapp.R
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -86,21 +84,21 @@ class SplashActivity : AppCompatActivity() {
                                     startActivity(Intent(this@SplashActivity, AdminDashboardActivity::class.java))
                                 }
                                 "organizer" -> {
-                                    Log.d(TAG, "Navigating to OrganizerDashboardActivity")
-                                    startActivity(Intent(this@SplashActivity, OrganizerDashboardActivity::class.java))
+                                    Log.d(TAG, "Navigating to organizermain")
+                                    startActivity(Intent(this@SplashActivity, organizermain::class.java))
                                 }
                                 "user" -> {
                                     Log.d(TAG, "Navigating to MainActivity")
                                     startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                                 }
                                 else -> {
-                                    Log.d(TAG, "Unknown role, navigating to ChooseRoleActivity")
-                                    startActivity(Intent(this@SplashActivity, ChooseRoleActivity::class.java))
+                                    Log.d(TAG, "Unknown role, navigating to activity_choose_role")
+                                    startActivity(Intent(this@SplashActivity, activity_choose_role::class.java))
                                 }
                             }
                         } else {
-                            Log.d(TAG, "No role selected, navigating to ChooseRoleActivity")
-                            startActivity(Intent(this@SplashActivity, ChooseRoleActivity::class.java))
+                            Log.d(TAG, "No role selected, navigating to activity_choose_role")
+                            startActivity(Intent(this@SplashActivity, activity_choose_role::class.java))
                         }
                     } else {
                         Log.d(TAG, "User does not exist in database, navigating to LoginActivity")
@@ -113,9 +111,9 @@ class SplashActivity : AppCompatActivity() {
                     if (selectedRole != null) {
                         when (selectedRole) {
                             "admin" -> startActivity(Intent(this@SplashActivity, AdminDashboardActivity::class.java))
-                            "organizer" -> startActivity(Intent(this@SplashActivity, OrganizerDashboardActivity::class.java))
+                            "organizer" -> startActivity(Intent(this@SplashActivity, organizermain::class.java))
                             "user" -> startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                            else -> startActivity(Intent(this@SplashActivity, ChooseRoleActivity::class.java))
+                            else -> startActivity(Intent(this@SplashActivity, activity_choose_role::class.java))
                         }
                     } else {
                         startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
@@ -125,8 +123,8 @@ class SplashActivity : AppCompatActivity() {
             } else {
                 Log.d(TAG, "User is not logged in or is anonymous")
                 if (isFirstTime) {
-                    Log.d(TAG, "First time user, navigating to OnboardingActivity")
-                    startActivity(Intent(this@SplashActivity, OnboardingActivity::class.java))
+                    Log.d(TAG, "First time user, navigating to onboarding1")
+                    startActivity(Intent(this@SplashActivity, onboarding1::class.java))
                 } else {
                     Log.d(TAG, "Not first time, navigating to LoginActivity")
                     startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
@@ -139,17 +137,5 @@ class SplashActivity : AppCompatActivity() {
             startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
             finish()
         }
-    }
-
-    fun logout() {
-        sharedPreferences.edit()
-            .remove("SelectedRole")
-            .putBoolean("IsFirstTime", true)
-            .apply()
-
-        FirebaseAuth.getInstance().signOut()
-
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
     }
 }
