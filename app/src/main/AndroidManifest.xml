@@ -48,6 +48,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.Travelplannerfyp.travelplannerapp.OrganizerTripCreationActivity" android:exported="true" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.RegisterActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.OtpVerificationActivity" android:exported="false" />
         <activity android:name="com.Travelplannerfyp.travelplannerapp.ForgotPasswordActivity" android:exported="false" />

@@ -106,11 +106,31 @@ class MyTripsFragment : Fragment() {
         val placeDescription = snapshot.child("placeDescription").getValue(String::class.java) ?: ""
         val tripDescription = snapshot.child("tripDescription").getValue(String::class.java) ?: ""
         val organizerName = snapshot.child("organizerName").getValue(String::class.java) ?: ""
-        val organizerPhone = snapshot.child("organizerPhone").getValue(String::class.java) ?: ""
+        val organizerPhoneValue = snapshot.child("organizerPhone").value
+        val organizerPhone = when (organizerPhoneValue) {
+            is String -> organizerPhoneValue
+            is Number -> organizerPhoneValue.toString()
+            else -> ""
+        }
         val organizerId = snapshot.child("organizerId").getValue(String::class.java) ?: ""
-        val startDate = snapshot.child("startDate").getValue(String::class.java) ?: ""
-        val endDate = snapshot.child("endDate").getValue(String::class.java) ?: ""
-        val seatsAvailable = snapshot.child("seatsAvailable").getValue(String::class.java)?.toIntOrNull() ?: 0
+        val startDateValue = snapshot.child("startDate").value
+        val startDate = when (startDateValue) {
+            is String -> startDateValue
+            is Number -> startDateValue.toString()
+            else -> ""
+        }
+        val endDateValue = snapshot.child("endDate").value
+        val endDate = when (endDateValue) {
+            is String -> endDateValue
+            is Number -> endDateValue.toString()
+            else -> ""
+        }
+        val seatsAvailableValue = snapshot.child("seatsAvailable").value
+        val seatsAvailable = when (seatsAvailableValue) {
+            is String -> seatsAvailableValue.toIntOrNull() ?: 0
+            is Number -> seatsAvailableValue.toInt()
+            else -> 0
+        }
         val placeImageUrl = snapshot.child("placeImageUrl").getValue(String::class.java) ?: ""
         val visibility = snapshot.child("visibility").getValue(String::class.java)?.let { 
             if (it == "PRIVATE") com.Travelplannerfyp.travelplannerapp.models.TripVisibility.PRIVATE 

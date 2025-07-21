@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    style="@style/Widget.Material3.CardView.Filled">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/stopImage"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_image"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/rounded_edittext" />
+
+        <TextView
+            android:id="@+id/stopName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stop Name"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/arrivalTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Arrival Time"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/durationMinutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Duration (min)"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/attractions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Attractions"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginTop="2dp" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView> 
