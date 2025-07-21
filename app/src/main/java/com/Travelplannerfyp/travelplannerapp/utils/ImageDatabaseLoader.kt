@@ -89,6 +89,22 @@ class ImageDatabaseLoader {
             // Set placeholder immediately while loading
             imageView.setImageResource(R.drawable.placeholder_image)
 
+            // Try to load from local resources first if URL contains a recognizable place name
+            val placeName = extractPlaceNameFromUrl(imageUrl)
+            if (placeName != null) {
+                val normalizedName = normalizePlaceName(placeName)
+                val resourceId = imageView.context.resources.getIdentifier(
+                    normalizedName,
+                    "drawable",
+                    imageView.context.packageName
+                )
+                if (resourceId != 0) {
+                    Log.d(TAG, "Found local resource for $placeName (normalized: $normalizedName)")
+                    imageView.setImageResource(resourceId)
+                    return
+                }
+            }
+
             when {
                 // Check if this is a database reference
                 imageUrl.startsWith(DB_PREFIX) -> {
@@ -125,24 +141,24 @@ class ImageDatabaseLoader {
                             .error(R.drawable.placeholder_image)
                             .into(imageView, object : Callback {
                                 override fun onSuccess() {
-                                    Log.d(TAG, "Picasso successfully loaded image from URL: $imageUrl")
+                                    Log.d(TAG, "Successfully loaded image from URL: $imageUrl")
                                 }
 
                                 override fun onError(e: Exception) {
-                                    Log.e(TAG, "Picasso failed to load image from URL: $imageUrl, Error: ${e.message}")
-                                    handleImageLoadError(imageView, imageUrl)
+                                    Log.e(TAG, "Failed to load image from URL: $imageUrl, Error: ${e.message}")
+                                    tryLocalImageFallback(imageView, imageUrl)
                                 }
                             })
                     } catch (e: Exception) {
-                        Log.e(TAG, "Exception setting up Picasso: ${e.message}")
-                        handleImageLoadError(imageView, imageUrl)
+                        Log.e(TAG, "Exception during Picasso setup: ${e.message}")
+                        tryLocalImageFallback(imageView, imageUrl)
                     }
                 }
 
                 // Unknown URL format - try to handle as database path or fallback
                 else -> {
                     Log.w(TAG, "Unknown URL format: $imageUrl, attempting fallback handling")
-                    handleImageLoadError(imageView, imageUrl)
+                    tryLocalImageFallback(imageView, imageUrl)
                 }
             }
         }
@@ -176,33 +192,10 @@ class ImageDatabaseLoader {
          * @return The extracted place name or null if not found
          */
         private fun extractPlaceNameFromUrl(url: String): String? {
-            // Try to extract place name from URL patterns
-            return try {
-                when {
-                    // Extract from path segments
-                    url.contains("/places/") -> {
-                        val afterPlaces = url.substringAfter("/places/")
-                        if (afterPlaces.contains("/")) {
-                            afterPlaces.substringBefore("/")
-                        } else {
-                            afterPlaces
-                        }
-                    }
-                    // Extract from filename
-                    url.contains("/") -> {
-                        val fileName = url.substringAfterLast("/")
-                        if (fileName.contains(".")) {
-                            fileName.substringBeforeLast(".")
-                        } else {
-                            fileName
-                        }
-                    }
-                    else -> null
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error extracting place name from URL: ${e.message}")
-                null
-            }
+            // Extract the filename without extension
+            val fileName = url.substringAfterLast('/').substringBeforeLast('.')
+            // Remove common prefixes/suffixes and dimensions
+            return fileName.replace(Regex("^(\\d+px-)|(-\\d+x\\d+)$"), "")
         }
 
         /**
@@ -387,26 +380,35 @@ class ImageDatabaseLoader {
             }
         }
 
-        private fun tryLocalImageFallback(imageView: ImageView, dbPath: String) {
-            try {
-                // Extract place name from the database path if possible
-                val placeName = when {
-                    dbPath.contains("places/") -> {
-                        val parts = dbPath.split("/")
-                        if (parts.size >= 2) parts[1] else null
-                    }
-                    else -> null
+        private fun tryLocalImageFallback(imageView: ImageView, imageUrl: String) {
+            // Try to extract a place name from the URL for fallback
+            val placeName = extractPlaceNameFromUrl(imageUrl)
+            if (placeName != null) {
+                Log.d(TAG, "Extracted place name from URL: $placeName")
+                // Normalize the place name to match drawable resource naming
+                val normalizedPlaceName = normalizePlaceName(placeName)
+                val resourceId = imageView.context.resources.getIdentifier(
+                    normalizedPlaceName,
+                    "drawable",
+                    imageView.context.packageName
+                )
+                Log.d(TAG, "Loading local image for place: $placeName (normalized: $normalizedPlaceName), resourceId: $resourceId")
+                if (resourceId != 0) {
+                    imageView.setImageResource(resourceId)
+                    return
                 }
-
-                if (placeName != null) {
-                    loadLocalImageByName(imageView, placeName)
-                } else {
-                    imageView.setImageResource(R.drawable.placeholder_image)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in tryLocalImageFallback: ${e.message}")
-                imageView.setImageResource(R.drawable.placeholder_image)
             }
+
+            // Try to load from database as fallback
+            if (imageUrl.contains("/")) {
+                val possibleDbPath = "places/${imageUrl.substringAfterLast('/')}/image"
+                Log.d(TAG, "Attempting fallback to database path: $possibleDbPath")
+                loadImageFromDatabase(imageView, possibleDbPath)
+                return
+            }
+
+            // Final fallback to placeholder
+            imageView.setImageResource(R.drawable.placeholder_image)
         }
 
         /**
@@ -432,23 +434,10 @@ class ImageDatabaseLoader {
          * @param placeName The place name to normalize
          * @return The normalized place name
          */
-        private fun normalizePlaceName(placeName: String): String {
-            // Remove common web image prefixes (e.g., 1200px-, 800px-), underscores, and file extensions
-            var normalized = placeName
-                .replace(Regex("^\\d+px-"), "") // Remove leading px-size
-                .replace(Regex("\\.jpg$|\\.jpeg$|\\.png$|\\.webp$"), "") // Remove file extensions
-                .replace("_", "")
-                .replace("-", "")
-                .replace("valley", "")
-                .replace("tour", "")
-                .replace("kaghan", "")
-                .replace("meadows", "meadows")
-                .replace(" ", "")
-                .lowercase()
-                .trim()
-            // Remove any remaining non-alphanumeric characters
-            normalized = normalized.replace(Regex("[^a-z0-9]"), "")
-            return normalized
+        private fun normalizePlaceName(name: String): String {
+            return name.lowercase()
+                .replace(Regex("[^a-z0-9]+"), "_")
+                .trim('_')
         }
 
         /**

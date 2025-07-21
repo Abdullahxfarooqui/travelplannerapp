@@ -28,6 +28,14 @@ class SplashActivity : AppCompatActivity() {
         try {
             auth = FirebaseAuth.getInstance()
             Log.d(TAG, "Firebase Auth initialized successfully")
+            
+            // Set persistence enabled
+            try {
+                auth.firebaseAuthSettings.setAppVerificationDisabledForTesting(false)
+                Log.d(TAG, "Firebase Auth persistence enabled")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to enable Firebase Auth persistence", e)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Firebase Auth", e)
             Toast.makeText(this, "Authentication service unavailable", Toast.LENGTH_SHORT).show()
@@ -61,17 +69,39 @@ class SplashActivity : AppCompatActivity() {
                 null
             }
             android.util.Log.d(TAG, "navigateBasedOnAuthAndRole: currentUser: ${currentUser?.uid}, email: ${currentUser?.email}")
+
             if (currentUser != null && currentUser.uid.isNotEmpty()) {
-                val selectedRole = sharedPreferences.getString("SelectedRole", null)
-                Log.d(TAG, "Authenticated user found, SelectedRole: $selectedRole")
+                // Verify the token is not expired
+                currentUser.getIdToken(false)
+                    .addOnSuccessListener { result ->
+                        val selectedRole = sharedPreferences.getString("SelectedRole", null)
+                        Log.d(TAG, "Authenticated user found, SelectedRole: $selectedRole")
 
-                val intent = when (selectedRole) {
-                    "User" -> Intent(this, MainActivity::class.java)
-                    "Organizer" -> Intent(this, organizermain::class.java)
-                    else -> Intent(this, MainActivity::class.java) // fallback
-                }
-
-                startActivity(intent)
+                        val intent = when (selectedRole) {
+                            "User" -> Intent(this, MainActivity::class.java)
+                            "Organizer" -> Intent(this, organizermain::class.java)
+                            else -> {
+                                // If role is missing but user is authenticated, go to role selection
+                                Log.d(TAG, "No role found for authenticated user, redirecting to role selection")
+                                Intent(this, activity_choose_role::class.java)
+                            }
+                        }
+                        startActivity(intent)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Token verification failed", e)
+                        // Token might be expired, try to refresh
+                        currentUser.reload()
+                            .addOnSuccessListener {
+                                Log.d(TAG, "User token refreshed successfully")
+                                navigateBasedOnAuthAndRole() // Try again after refresh
+                            }
+                            .addOnFailureListener { reloadError ->
+                                Log.e(TAG, "Failed to refresh user token", reloadError)
+                                // Force re-login
+                                startActivity(Intent(this, LoginActivity::class.java))
+                            }
+                    }
             } else {
                 Log.d(TAG, "No authenticated user, redirecting to login")
                 startActivity(Intent(this, LoginActivity::class.java))

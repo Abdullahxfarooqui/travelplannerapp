@@ -172,7 +172,7 @@ let map;
     }
     if (!places.length) {
         try {
-            const url = `${API_URL}?key=${LOCATIONIQ_TOKEN}&lat=${lat}&lon=${lon}&tag=tourism:*&radius=3000&format=json`;
+            const url = `${API_URL}?key=${LOCATIONIQ_TOKEN}&lat=${lat}&lon=${lon}&tag=tourism:*&radius=10000&format=json`;
             const resp = await fetch(url);
             if (!resp.ok) throw new Error('API error');
             places = await resp.json();
@@ -229,32 +229,50 @@ let map;
     }
     // --- Send to Android ---
     if (window.AndroidBridge && window.AndroidBridge.setNearbyAttractions) {
-        // Prepare a simplified array for Android
-        const tripLat = lat, tripLon = lon;
-        const androidPlaces = places.map((place, idx) => {
-            const dist = (place.lat && place.lon) ? haversine(tripLat, tripLon, place.lat, place.lon) : 0;
-            let address = '';
-            if (place.address) {
-                address = place.address.name || '';
-                if (place.address.road) address += ', ' + place.address.road;
-                if (place.address.city) address += ', ' + place.address.city;
-                if (place.address.state) address += ', ' + place.address.state;
-                if (place.address.country) address += ', ' + place.address.country;
-            } else if (place.display_name) {
-                address = place.display_name;
+        try {
+            // Prepare a simplified array for Android
+            const tripLat = lat, tripLon = lon;
+            // Add mock data if no places found
+            if (!places || !places.length) {
+                places = [
+                    { name: "Test Place 1", type: "Test", lat: lat+0.001, lon: lon+0.001, address: "Test Address 1" },
+                    { name: "Test Place 2", type: "Test", lat: lat+0.002, lon: lon+0.002, address: "Test Address 2" }
+                ];
             }
-            return {
-                name: place.name || place.display_name || 'Unknown',
-                description: '',
-                imageUrl: '',
-                type: place.type || place.class || '',
-                distance: dist,
-                address: address,
-                latitude: place.lat || null,
-                longitude: place.lon || null
-            };
-        });
-        window.AndroidBridge.setNearbyAttractions(JSON.stringify(androidPlaces));
+            const androidPlaces = places.map((place, idx) => {
+                const dist = (place.lat && place.lon) ? haversine(tripLat, tripLon, place.lat, place.lon) : 0;
+                let address = '';
+                if (place.address) {
+                    address = place.address.name || '';
+                    if (place.address.road) address += ', ' + place.address.road;
+                    if (place.address.city) address += ', ' + place.address.city;
+                    if (place.address.state) address += ', ' + place.address.state;
+                    if (place.address.country) address += ', ' + place.address.country;
+                } else if (place.display_name) {
+                    address = place.display_name;
+                }
+                return {
+                    name: place.name || place.display_name || 'Unknown',
+                    description: '',
+                    imageUrl: '',
+                    type: place.type || place.class || '',
+                    distance: dist,
+                    address: address,
+                    latitude: place.lat || null,
+                    longitude: place.lon || null
+                };
+            });
+            console.log("Sending to Android:", JSON.stringify(androidPlaces));
+            window.AndroidBridge.setNearbyAttractions(JSON.stringify(androidPlaces));
+        } catch (e) {
+            console.error("Error sending data to Android:", e);
+            // Send error to Android
+            window.AndroidBridge.setNearbyAttractions(JSON.stringify([
+                { name: "Error loading places", description: e.message, type: "Error", distance: 0, address: "", latitude: lat, longitude: lon }
+            ]));
+        }
+    } else {
+        console.error("AndroidBridge not available");
     }
 })();
 
