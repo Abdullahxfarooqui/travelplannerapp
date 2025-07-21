@@ -19,6 +19,7 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var sharedPreferences: SharedPreferences
     private val TAG = "SplashActivity"
+    private var isFirstTime: Boolean = true  // Default to true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +44,7 @@ class SplashActivity : AppCompatActivity() {
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
-        val isFirstTime = sharedPreferences.getBoolean("IsFirstTime", true)
+        isFirstTime = sharedPreferences.getBoolean("IsFirstTime", true)  // Initialize class property
         android.util.Log.d(TAG, "SplashActivity started. isFirstTime: $isFirstTime")
         android.util.Log.d(TAG, "auth.currentUser: ${auth.currentUser?.uid}, email: ${auth.currentUser?.email}")
         android.util.Log.d(TAG, "SharedPreferences SelectedRole: ${sharedPreferences.getString("SelectedRole", null)}")
@@ -124,6 +125,8 @@ class SplashActivity : AppCompatActivity() {
                 Log.d(TAG, "User is not logged in or is anonymous")
                 if (isFirstTime) {
                     Log.d(TAG, "First time user, navigating to onboarding1")
+                    // Update the first time flag
+                    sharedPreferences.edit().putBoolean("IsFirstTime", false).apply()
                     startActivity(Intent(this@SplashActivity, onboarding1::class.java))
                 } else {
                     Log.d(TAG, "Not first time, navigating to LoginActivity")
